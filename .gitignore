@@ -1,1 +1,46 @@
 .obsidian/
+
+# Se agregan archivos que no se comparten entre los devs por el backend
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Configuración del entorno
+.env
+.env.*  # Por si usás .env.development o similares
+
+# Base de datos (si usás SQLite temporalmente o dumps)
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+
+# Archivos de logs
+logs/
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de compilación o temporales
+dist/
+build/
+coverage/
+tmp/
+temp/
+.cache/
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+
+# PM2 logs (si usás PM2 en dev)
+pids/
+*.pid
+*.seed
+*.pid.lock
+pm2.log
