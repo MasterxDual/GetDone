@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log('Login exitoso:', data);
 
-            window.location.href = '/frontend/views/tasklist.html';
+            window.location.href = '/views/tasklist.html';
 
         } catch (error) {
             console.error('Error:', error);
