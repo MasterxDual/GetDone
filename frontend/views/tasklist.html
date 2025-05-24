@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All Tasks</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="../css/tasklist.css" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Botón de cierre de sesión -->
+  <button class="logout-btn" title="Cerrar sesión" onclick="logout()">
+    <i class="bi bi-power"></i>
+  </button>
+  
+  <!-- Botón flotante para crear tarea -->
+<button class="create-task-btn" title="Crear nueva tarea" onclick="goToCreateTask()">
+  <i class="bi bi-plus-lg"></i>
+</button>
+
+
+  <!-- Encabezado -->
+  <div class="header text-center">
+    <h1 class="fw-bold mb-2">Todas las Tareas</h1>
+    <p class="text-muted">Aqui hay una lista con tus tareas</p>
+  </div>
+
+  <!-- Lista de tareas -->
+  <div class="task-list" id="taskList">
+    <!-- Task 1 -->
+    <div class="row align-items-center task-item">
+      <div class="col-auto">
+        <img src="https://cdn-icons-png.flaticon.com/512/3209/3209265.png" alt="Task Icon" class="task-img">
+      </div>
+
+      <div class="col">
+        <h5 class="mb-0">${task.title}</h5>
+        <p class="text-muted mb-0">${task.description}</p> 
+      </div>
+
+      <div class="col-auto task-meta">
+        <!-- d-flex: ponemos los elementos uno al lado del otro
+        gap-2: separacion entre el boton y el texto -->
+        <div class="d-flex align-items-start gap-2">
+          <!-- Botón de opciones con menú desplegable -->
+          <div class="dropdown text-end mt-2">
+
+          <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton"
+          data-bs-toggle="dropdown" aria-expanded="false">
+          <!-- Añade los tres puntos al botón -->
+          <i class="bi bi-three-dots-vertical"></i>
+          </button>
+
+          <!-- Añade un desplegable con opciones que se abre cuando clickeamos los tres puntos -->
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li><a class="dropdown-item" href="#" onclick="editTask()">Editar</a></li>
+          <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask()">Eliminar</a></li>
+          </ul>
+
+        </div>
+
+        <!-- Mostramos la prioridad y la expiración -->
+        <div>
+          <strong>Prioridad: ${task.priority}</strong><br>
+          <span class="text-muted">Exp: ${task.delivery_date}</span>
+        </div>
+
+      </div>
+    </div>
+    </div>
+  </div>
+
+
+  <!-- Script -->
+  <script src="../js/tasklist.js"></script>
+
+  <!-- Para que funcione el menú desplegable.
+  Activa los dropdowns, modals, tooltips, etc -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
