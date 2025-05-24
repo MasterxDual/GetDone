@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Si la respuesta es exitosa, redirigir al usuario a la página de inicio de sesión
                 mostrarMensaje('Usuario registrado exitosamente. Por favor, inicia sesión.');
                 form.reset(); // Limpiar el formulario
-                window.location.href = 'login.html'; // Redirigir a la página de inicio de sesión
+                window.location.href = '/views/auth/login.html'; // Redirigir a la página de inicio de sesión
             } else {
                 mostrarMensaje(dataAnswer.message ||'Error al registrar usuario. Por favor, intenta nuevamente.');
             }
