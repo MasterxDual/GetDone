@@ -63,7 +63,6 @@ sequelize.sync()
     });
 
 
-
 /* Funcionalidad Deprecada: */
 
 // // Iniciar el servidor y escuchar en el puerto definido
