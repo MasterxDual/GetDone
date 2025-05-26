@@ -127,5 +127,5 @@ function goToCreateTask() {
     window.location.href = "tasks.html";
   }
 
-  // Llamamos la función al cargar la página
-  window.onload = loadTasks;
+ // Llamamos la función al cargar la página
+ window.onload = loadTasks;
