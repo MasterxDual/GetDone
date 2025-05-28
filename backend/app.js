@@ -85,7 +85,6 @@ sequelize.sync({ alter: true }) // Cambiado de sync() a sync({ alter: true })
     });
 
 
-
 /* Funcionalidad Deprecada: */
 
 // // Iniciar el servidor y escuchar en el puerto definido
