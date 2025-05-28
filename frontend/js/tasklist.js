@@ -33,47 +33,46 @@ async function loadTasks() {
       list.innerHTML = ''; // limpiamos antes de agregar
 
       tasks.forEach(task => {
+        const completedClass = task.completed ? 'completed' : '';
+        
+        // Calcular si la tarea expira en 1 día o menos
+        const today = new Date();
+        const dueDate = new Date(task.delivery_date);
+        const diffTime = dueDate.getTime() - today.setHours(0,0,0,0);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Si falta 1 día o menos, aplicar clase de expiración
+        const expClass = (diffDays <= 1 && diffDays >= 0 && !task.completed) ? 'expiring-soon' : '';
+
         const html = `
-          <div class="row align-items-center task-item">
-            <div class="col-auto">
-              <img src="https://cdn-icons-png.flaticon.com/512/3209/3209265.png" alt="Task Icon" class="task-img">
-            </div>
-
-            <div class="col">
-              <h5 class="mb-0">${task.title}</h5>
-              <p class="text-muted mb-0">${task.description}</p> 
-            </div>
-
-            <div class="col-auto task-meta">
-              <!-- d-flex: ponemos los elementos uno al lado del otro
-              gap-2: separacion entre el boton y el texto -->
-              <div class="d-flex align-items-start gap-2">
-                <!-- Botón de opciones con menú desplegable -->
-                <div class="dropdown text-end mt-2">
-
+        <div class="row align-items-center task-item ${completedClass}">
+          <div class="col-auto">
+            <img src="https://cdn-icons-png.flaticon.com/512/3209/3209265.png" alt="Task Icon" class="task-img">
+          </div>
+          <div class="col">
+            <h5 class="mb-0">${task.title}</h5>
+            <p class="text-muted mb-0">${task.description}</p> 
+          </div>
+          <div class="col-auto task-meta">
+            <div class="d-flex align-items-start gap-2">
+              <div class="dropdown text-end mt-2">
                 <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <!-- Añade los tres puntos al botón -->
-                <i class="bi bi-three-dots-vertical"></i> 
+                  data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-three-dots-vertical"></i> 
                 </button>
-
-                <!-- Añade un desplegable con opciones que se abre cuando clickeamos los tres puntos -->
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})">Editar</a></li>
-                <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask()">Eliminar</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})">Editar</a></li>
+                  <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask()">Eliminar</a></li>
                 </ul>
-
               </div>
-
-              <!-- Mostramos la prioridad y la expiración -->
               <div>
                 <strong>Prioridad: ${task.priority}</strong><br>
-                <span class="text-muted">Exp: ${task.delivery_date}</span>
+                <span class="${expClass}">Exp: ${task.delivery_date}</span>
               </div>
-
             </div>
           </div>
-        `;
+        </div>
+  `     ;    
         list.innerHTML += html; //Carga dinámicamente el HTML de cada tarea en la lista del frontend
       });
     } catch (error) {

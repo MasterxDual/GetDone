@@ -79,3 +79,18 @@ body {
 .create-task-btn:hover {
   background-color: #0b5ed7;
 }
+
+.task-item.completed {
+  background-color: #d4edda !important; /* Verde claro */
+  opacity: 0.7;
+}
+
+.expiring-soon {
+  display: inline-block;
+  background-color: #ff4d4f;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-top: 4px;
+}

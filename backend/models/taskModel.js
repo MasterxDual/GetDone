@@ -28,6 +28,11 @@ const Tarea = sequelize.define('Tarea', {
     type: DataTypes.ENUM('Alta', 'Media', 'Baja'),
     allowNull: false
   },
+  completed: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  } 
 }, { // Configuración adicional para el modelo
 
   tableName: 'tasks',             // Definimos el nombre de la tabla en la base de datos

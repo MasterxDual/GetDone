@@ -20,7 +20,8 @@ async function newTask(req, res) {
             title,
             description,
             delivery_date,
-            priority: priority // Este valor debe coincidir con el ENUM definido: 'Alta', 'Media' o 'Baja'
+            priority: priority, // Este valor debe coincidir con el ENUM definido: 'Alta', 'Media' o 'Baja'
+            completed: false // Por defecto, una tarea recién creada no está completada
         });
 
         // Respondemos con estado 201 (creado) y la tarea generada
