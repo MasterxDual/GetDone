@@ -1,0 +1,105 @@
+<!-- Pantalla para que los usuarios se puedan unir a un grupo -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Join Group - GetDone</title>
+
+    <!-- Bootstrap's CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="../../css/main.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Botón flotante para crear Grupo -->
+        <button class="create-group-btn" title="Create new Group" onclick="goToCreateGroup()">
+                <i class="bi bi-plus-lg"></i>
+        </button>
+
+        <!-- Barra Lateral -->
+        <div class="slidebar d-flex flex-column p-3">
+            <h4 class="mb-3"><i class="bi bi-check2-square"></i> GetDone</h4>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="./home.html">
+                        <i class="bi bi-people fs-5"></i>
+                        My Groups
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="create-group.html">
+                        <i class="bi bi-plus-circle fs-5"></i>
+                        Create Group
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="join-group.html">
+                        <i class="bi bi-box-arrow-in-right fs-5"></i>
+                        Join a Group
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-gear fs-5"></i>
+                        Settings
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="main-content p-3">
+            <!-- Headers -->
+            <div class="header d-flex justify-content-between align-items-center">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item active">Join Group</li>
+                        <!-- <li class="breadcrumb-item"><a class="link-create-group" href="#">Create Group</a></li> -->
+                    </ol>
+                </nav>
+                <!-- Formulario con Buscador, Notificaciones y Perfil de Usuario -->
+                <form class="d-flex align-items-center">
+                    <!-- Buscador -->
+                    <div class="search-container position-relative">
+                        <input class="form-control pe-5" type="search" placeholder="Search...">
+                        <i class="bi bi-search position-absolute end-0 top-50 translate-middle-y me-4"></i>
+                    </div>
+                    <!-- Notificaciones y Perfil de Usuario -->
+                    <a href="#" class="btn btn-notification">
+                        <i class="bi bi-bell"></i>
+                    </a>
+                    <!-- Avatar de Usuario -->
+                    <div class="user-avatar">
+                        <a href="#"><i class="bi bi-person-circle fs-4"></i></a>
+                    </div>
+                    <!-- <a href="#"><img src="#" alt="user" width="30" height="30" class="rounded-circle ms-2"></a> Perfil de Usuario -->
+                </form>
+            </div>
+
+            <!-- Contenedor para unirse a un Grupo -->
+            <div class="mt-4">
+                <h2>Join a Group</h2>
+                <form id="joinGroupForm" class="mt-4">
+                    <div class="mb-3">
+                        <label for="inviteCodeInput" class="form-label">Invitation Code</label>
+                        <input type="text" class="form-control" id="inviteCodeInput" placeholder="Enter the invitation code" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Join</button>
+                </form>
+                <div id="message" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap's JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+
+    <!-- Script Personalizado -->
+    <script src="../../js/join-group.js"></script>
+</body>
+</html>

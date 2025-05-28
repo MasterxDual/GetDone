@@ -7,12 +7,15 @@ const { DataTypes } = require('sequelize');
 // Importa la instancia de Sequelize que se conecta a la base de datos (conexion ya establecida)
 const sequelize = require('../config/sequelize');
 
-// Importa byscript para el hasheo seguro de contraseñas
-const bcrypt = require('bcryptjs');
 
 // Define el modelo de Usuario usando Sequelize
 // El primer argumento ('User') es el nombre del modelo, y el segundo es un objeto que define las columnas de la tabla.
 const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.INTEGER,        // Tipo de dato de la columna
+        primaryKey: true,               // Indica que esta columna es la clave primaria de la tabla
+        autoIncrement: true             // Indica que el valor de esta columna se incrementa automáticamente cada vez que se inserta un nuevo
+    },
     firstName: {
         type: DataTypes.STRING,         // Tipo de dato: STRING (VARCHAR en SQL)
         allowNull: false,               // No permite valores nulos (campo requerido)
@@ -25,6 +28,9 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,         // Tipo de dato: STRING (VARCHAR en SQL)
         allowNull: false,               // No permite valores nulos (campo requerido)
         unique: true,                   // Debe ser único (no se permiten duplicados)
+        validate: {
+            isEmail: true               // Valida que el valor sea una dirección de correo electrónico válida
+        }
     },
     password: {
         type: DataTypes.STRING,         // Tipo de dato: STRING (VARCHAR en SQL) para almacerenar la contraseña hasheada
