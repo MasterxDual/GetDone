@@ -1,0 +1,126 @@
+<!-- Pantallla para visualizar un grupo siendo administrador -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Grupo - Administrador</title>
+
+    <!-- Bootstrap's CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="../../css/main.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Barra Lateral -->
+        <div class="slidebar d-flex flex-column p-3">
+            <h4 class="mb-3"><i class="bi bi-check2-square"></i> GetDone</h4>
+            <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="../user/home.html">
+                        <i class="bi bi-people fs-5"></i>
+                        My Groups
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../user/create-group.html">
+                        <i class="bi bi-plus-circle fs-5"></i>
+                        Create Group
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="join-group.html">
+                        <i class="bi bi-box-arrow-in-right fs-5"></i>
+                        Join a Group
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-gear fs-5"></i>
+                        Settings
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="main-content p-3">
+            <!-- Headers -->
+            <div class="header d-flex justify-content-between align-items-center">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item active">Panel de Administrador del Grupo</li>
+                        <!-- <li class="breadcrumb-item"><a class="link-create-group" href="#">Create Group</a></li> -->
+                    </ol>
+                </nav>
+                <!-- Formulario con Buscador, Notificaciones y Perfil de Usuario -->
+                <form class="d-flex align-items-center">
+                    <!-- Buscador -->
+                    <div class="search-container position-relative">
+                        <input class="form-control pe-5" type="search" placeholder="Search...">
+                        <i class="bi bi-search position-absolute end-0 top-50 translate-middle-y me-4"></i>
+                    </div>
+                    <!-- Notificaciones y Perfil de Usuario -->
+                    <a href="#" class="btn btn-notification">
+                        <i class="bi bi-bell"></i>
+                    </a>
+                    <!-- Avatar de Usuario -->
+                    <div class="user-avatar">
+                        <a href="#"><i class="bi bi-person-circle fs-4"></i></a>
+                    </div>
+                    <!-- <a href="#"><img src="#" alt="user" width="30" height="30" class="rounded-circle ms-2"></a> Perfil de Usuario -->
+                </form>
+            </div>
+
+            <!-- Contenido del Grupo-->
+            <div class="group-list mt-4" id="groupList">
+                <div id="groupInfo" class="mb-3">
+                    <h2 id="groupName"></h2>
+                    <p id="groupDescription"></p>
+                    <!-- Codigo de Invitacion -->
+                    <p>
+                        <strong>Código de invitación:</strong>
+                        <span id="inviteCode" class="fw-bold"></span>
+                        <button class="btn btn-outline-secondary btn-sm ms-2" id="copyInviteCodeBtn">Copiar</button>
+                    </p>
+                </div>
+
+                <!-- Invitar a otros usuarios -->
+                <h4>Invitar Usuarios</h4>
+                <!-- Invitar por email -->
+                <form id="inviteForm" class="mb-4">
+                    <div class="mb-3">
+                        <label for="inviteEmail" class="form-label">Email del usuario a invitar</label>
+                        <input type="email" class="form-control" id="inviteEmail" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar Invitación</button>
+                </form>
+                
+                <!-- Lista de Integrantes -->
+                <h4>Integrantes del Grupo</h4>
+                <ul id="membersList" class="list-group mb-4">
+                    <!-- Aquí se listarán los integrantes dinamicamente-->
+                </ul>
+
+                
+                <h4>Tareas del Grupo</h4>
+                <button id="createTaskBtn" class="btn btn-success mb-3" onclick="goToCreateTask()">Crear Nueva Tarea</button>
+                <!-- Lista de Tareas -->
+                <div class="task-list" id="taskList">
+                    <!-- Aqui el Script se encarga de crear las tareas -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap's JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+    <!-- Script Personalizado -->
+    <script src="../../js/tasks-list.js"></script>
+    <script src="../../js/group-admin.js"></script>
+</body>
+</html>
