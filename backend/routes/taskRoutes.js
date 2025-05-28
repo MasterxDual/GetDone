@@ -31,6 +31,29 @@ router.get("/", taskController.getTasks);
  */
 router.get("/:id", taskController.getTaskById);
 
+/**
+ * Ruta para agregar comentario a una tarea
+ * @api {POST} /api/tasks/:taskId/comments
+ * @apiName AddComment
+ * @apiGroup Tasks
+ */
+router.post("/:taskId/comments", taskController.addComment);
+
+/**
+ * Ruta para obtener comentarios de una tarea
+ * @api {GET} /api/tasks/:taskId/comments
+ * @apiName GetComments
+ * @apiGroup Tasks
+ */
+router.get("/:taskId/comments", taskController.getComments);
+
+/**
+ * Ruta para marcar tarea como completada
+ * @api {PATCH} /api/tasks/:taskId/complete
+ * @apiName MarkComplete
+ * @apiGroup Tasks
+ */
+router.patch("/:taskId/complete", taskController.markComplete);
 
 /* Futuras implementaciones: */
 // router.put("/:id", taskController.updateTask);
