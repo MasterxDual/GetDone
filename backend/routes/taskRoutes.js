@@ -55,6 +55,14 @@ router.get("/:taskId/comments", taskController.getComments);
  */
 router.patch("/:taskId/complete", taskController.markComplete);
 
+/**
+ * Ruta para actualizar una tarea por su ID
+ * @api {PUT} /api/tasks/:id
+ * @apiName UpdateTask
+ * @apiGroup Tasks
+ */
+router.put("/:id", taskController.updateTask);
+
 /* Futuras implementaciones: */
 // router.put("/:id", taskController.updateTask);
 // router.delete("/:id", taskController.deleteTask);

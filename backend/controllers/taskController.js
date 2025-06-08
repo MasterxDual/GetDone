@@ -43,6 +43,7 @@ async function newTask(req, res) {
         // Extracción y validación de campos obligatorios
         const { title, description, delivery_date, priority, groupId, assignedTo } = req.body;
         const assignedBy = req.user.id; // ID del usuario que asigna la tarea
+        const status = 'pending'; // Valor por defecto para el estado de la tarea
 
         if (!title || !groupId || !assignedTo) {
             return res.status(400).json({ 
@@ -52,17 +53,17 @@ async function newTask(req, res) {
 
         // Creación de la tarea en la base de datos
         const tarea = await taskModel.create({
-            title,
-            description,
-            delivery_date,
-            priority,
-            groupId,
-            assignedBy,
-            assignedTo,
-            status: status || 'pending',    // Valor por defecto
-            completedAt: completedAt || null,
-            createdAt: new Date(),         // Timestamps manuales
-            updatedAt: new Date()
+          title,
+          description,
+          delivery_date,
+          priority,
+          groupId,
+          assignedBy,
+          assignedTo,
+          status,
+          completedAt: null,
+          createdAt: new Date(),         // Timestamps manuales
+          updatedAt: new Date()
         });
 
         res.status(201).json({ 
@@ -215,6 +216,43 @@ async function getTaskById(req, res) {
     }
 }
 
+
+async function updateTask(req, res) {
+  try {
+    const { id } = req.params; // ID de la tarea desde los parámetros de la URL
+    const { completed } = req.body; // Campo `completed` desde el cuerpo de la solicitud
+
+    // Validar que el campo `completed` sea booleano
+    if (typeof completed !== 'boolean') {
+      return res.status(400).json({ error: 'El campo "completed" debe ser true o false.' });
+    }
+
+    // Buscar la tarea en la base de datos
+    const task = await taskModel.findByPk(id);
+
+    // Si no se encuentra la tarea, devolver un error 404
+    if (!task) {
+      return res.status(404).json({ error: 'Tarea no encontrada.' });
+    }
+
+    // Actualizar el campo `completed`
+    task.completed = completed;
+    await task.save();
+
+    // Responder con la tarea actualizada
+    res.json({ mensaje: 'Tarea actualizada correctamente.', task });
+  } catch (error) {
+    console.error('Error al actualizar la tarea:', error);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+}
+
+// // Ruta PUT para modificar solo la descripción y fecha de entrega de una tarea
+// router.put('/:id', async (req, res) => {
+//   try {
+//     const { id } = req.params; //Trae los parametros de la URL
+//     const { description, delivery_date } = req.body; //Trae el body de la peticion
+
 /**
  * @function getComments
  * @description Obtiene todos los comentarios de una tarea ordenados cronológicamente
@@ -324,6 +362,7 @@ module.exports = {
     newTask,
     getTasks,
     getTaskById,
+    updateTask,
     addComment,
     getComments,
     markComplete,

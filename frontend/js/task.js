@@ -95,7 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
             delivery_date: form.fecha_entrega.value,
             priority: form.prioridad.value,
             groupId: groupId,
-            assignedTo: form.usuario_id.value
+            assignedTo: form.usuario_id.value,
+            status: 'pending'
         };
 
         console.log('Datos enviados:', formData);
