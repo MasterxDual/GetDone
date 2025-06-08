@@ -1,59 +1,50 @@
 # GetDone – Plataforma Web para Gestión de Tareas
 
-Proyecto de un sistema completo para la gestión de tareas con arquitectura de frontend y backend separadas.
+<div align="center">
+  <img src="./frontend/assets/images/GetDone.png" alt="Logo" width="200" style="border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
+
+  <p align="center">
+    <em>¡Crea Grupos colaborativos y administra Tareas!</em>
+  </p>
+
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?style=for-the-badge&logo=sequelize&logoColor=white)](https://sequelize.org/)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/docs/Web/CSS)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/docs/Web/JavaScript)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+
+</div>
+
+---
+
+## 📌 Descripción del Proyecto
+
+**GetDone** es una Aplicación web para la gestión colaborativa de tareas y grupos, con frontend y backend desacoplados, que facilita la organización, asignación y seguimiento de actividades en equipo.
 
 ---
 
 ## 📁 Estructura del Proyecto
 
 ```
-task-manager/
-├── frontend/               # Parte del cliente
-│   ├── assets/
-│   │   ├── images/        # Íconos, logos, gráficos
-│   │   └── fonts/         # Fuentes personalizadas
-│   ├── css/
-│   │   ├── auth.css       # Estilos para autenticación
-│   │   ├── admin.css      # Estilos específicos admin
-│   │   ├── user.css       # Estilos específicos usuario
-│   │   └── main.css       # Estilos compartidos
-│   ├── js/
-│   │   ├── auth.js        # Lógica de autenticación
-│   │   ├── admin.js       # Funcionalidades admin
-│   │   ├── user.js        # Funcionalidades usuario
-│   │   ├── charts.js      # Gráficos (Chart.js)
-│   │   └── notifications.js # Notificaciones
-│   ├── views/
-│   │   ├── auth/
-│   │   │   ├── login.html
-│   │   │   └── register.html
-│   │   ├── admin/
-│   │   │   ├── dashboard.html  # Vista principal admin
-│   │   │   ├── tasks.html      # CRUD tareas
-│   │   │   ├── projects.html   # Gestión proyectos
-│   │   │   ├── users.html      # Asignación tareas
-│   │   │   └── reports.html    # Estadísticas
-│   │   ├── user/
-│   │   │   ├── dashboard.html  # Vista principal usuario
-│   │   │   ├── mytasks.html    # Tareas asignadas
-│   │   │   ├── profile.html    # Perfil usuario
-│   │   │   ├── shared.html     # Proyectos compartidos
-│   │   │   └── stats.html      # Estadísticas personales
-│   │   └── shared/             # Componentes reutilizables
-│   │       ├── navbar.html
-│   │       ├── footer.html
-│   │       └── notification.html
-│   └── index.html              # Página de inicio pública
-├── backend/                # Parte del servidor
-│   ├── config/             # Configuraciones
-│   ├── controllers/        # Controladores
-│   ├── models/             # Modelos de datos
-│   ├── routes/             # Rutas
-│   ├── middlewares/        # Middlewares
-│   └── app.js              # Aplicación principal
-├── database/               # Scripts y modelos de base de datos
-├── docs/                   # Documentación
-└── README.md               # Documentación principal
+GetDone/
+├── frontend/               # Cliente web (HTML, CSS, JS)
+│   ├── assets/             # Imágenes y fuentes
+│   ├── css/                # Hojas de estilo
+│   ├── js/                 # Scripts principales (admin, user, auth, tasks, etc.)
+│   └── views/              # Vistas HTML (admin, user, auth)
+├── backend/                # Servidor Node.js/Express
+│   ├── config/             # Configuración de Sequelize y BD
+│   ├── controllers/        # Lógica de negocio (usuarios, grupos, tareas)
+│   ├── models/             # Modelos Sequelize
+│   ├── routes/             # Endpoints de la API REST
+│   ├── middleware/         # Middlewares (autenticación, etc.)
+│   └── app.js              # Entrada principal del backend
+├── database/               # Modelos de BD.
+├── enunciado_proyecto/     # Documentación adicional
+└── README.md               # Este archivo
 ```
 
 ---
@@ -70,8 +61,8 @@ task-manager/
 ### 1. Clona el repositorio
 
 ```bash
-git clone https://github.com/MasterxDual/GetDone-I.S.II.git
-cd GetDone-I.S.II/
+git clone https://github.com/TOB1EH/GetDone.git
+cd GetDone/
 ```
 
 ### 2. Configura el backend
@@ -93,15 +84,23 @@ Por convención: Todos los comandos `npm` deben ejecutarse dentro de la carpeta 
     DB_PASS=contraseña
     DB_HOST=localhost
     PORT=3000
-    ```
-4. Configura la base de datos (usa uno de los siguientes métodos):
 
-    - **Sin migraciones:**  
+    JWT_SECRET=tu_clave_secreta
+    ```
+    Puedes crear un token aleatorio para usar como clave con el siguiente comando desde la Terminal de Linux:
+    ```bash
+    head -c 32 /dev/urandom | base64
+    ```
+
+4. Configura la base de datos:
+
+    **Sin migraciones:**  
     Asegúrate de tener PostgreSQL corriendo y una base de datos creada.
     Asegúrate de que `sequelize.sync()` esté activado en el código. Nosostros lo configuramos dentro del archivo `app.js` en el backend. Asi que para crear las tablas de la BD automaticamente en caso que no existan es suficiente con iniciar el servidor backend.
-      ```bash
-      node app.js
-      ```
+
+    **La Base de datos debera tener la siguiente estructura:**
+    ![Diagrama Entidad Relacion DB](./db/DER.png)
+
     <!-- - **Con migraciones:**  
       ```bash
       npx sequelize-cli db:migrate
@@ -111,14 +110,15 @@ Por convención: Todos los comandos `npm` deben ejecutarse dentro de la carpeta 
     ```bash
     npm start
     ```
-    El backend estará disponible en `http://localhost:3000`.
+    El backend estará disponible en [http://localhost:3000](http://localhost:3000).
 
 6. Abrir la app:
 
 Nos ubicamos en la carpeta de frontend e ingresamos el siguiente comando:
 ```bash
     npx live-server
-    ```
+```
+
 ### 3. Configura el frontend
 
 1. Entra a la carpeta:
@@ -137,11 +137,12 @@ Nos ubicamos en la carpeta de frontend e ingresamos el siguiente comando:
 
 ---
 
-## 📚 Documentación
+## 📚 Documentación y arquitectura
 
-- Los endpoints principales de la API están en `backend/routes/`.
-- Lógica de negocio y modelos en `backend/controllers/` y `backend/models/`.
-- El frontend consume la API a través de los scripts en `frontend/js/`.
+- **Endpoints principales:** `/backend/routes/`
+- **Lógica de negocio y modelos:** `/backend/controllers/` y `/backend/models/`
+- **Frontend:** `/frontend/js/` y `/frontend/views/`
+- **El frontend consume la API REST del backend usando fetch y JWT para autenticación.**
 
 ---
 

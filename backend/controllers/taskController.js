@@ -1,41 +1,56 @@
-// Controlador de tareas
+// Controlador: taskController.js
+// Descripción: Maneja todas las operaciones relacionadas con tareas y sus comentarios
+// Responsabilidades:
+// - Creación/gestión de tareas
+// - Manejo de comentarios en tareas
+// - Cambio de estados (completado)
+// - Validación de permisos
 
-// Importamos el modelo 'taskModel' desde la carpeta de modelos
-// Este modelo está vinculado a la tabla de PostgreSQL
-const GroupMember = require('../models/groupMemberModel');
-const taskModel = require('../models/taskModel');
-const TaskComment = require('../models/taskCommentModel');
+// Importación de modelos requeridos
+const GroupMember = require('../models/groupMemberModel'); // Modelo de membresías de grupo
+const taskModel = require('../models/taskModel');          // Modelo principal de tareas
+const TaskComment = require('../models/taskCommentModel'); // Modelo de comentarios
 
 /**
- * Controlador para registrar una nueva tarea
- * @param {Object} req - Objeto de solicitud HTTP (contiene los datos de la tarea en el body)
- * @param {Object} res - Objeto de respuesta HTTP
- * @returns {Promise<Object>} - Respuesta JSON con el resultado de la operación
+ * @function newTask
+ * @description Crea una nueva tarea con validación de permisos de administrador
+ * @param {Object} req - Request de Express con:
+ *   - body: { title, description, delivery_date, priority, groupId, assignedTo }
+ *   - user: { id } (usuario autenticado)
+ * @param {Object} res - Response de Express
+ * @returns {Object} JSON con la tarea creada o mensaje de error
+ * @throws {403} Si el usuario no es admin del grupo
+ * @throws {400} Si faltan campos obligatorios
+ * @throws {500} Error interno del servidor
  */
 async function newTask(req, res) {
     try {
-        // Antes de crear una tarea, verificamos que el usuario sea administrador del grupo
+        // Validación de permisos: el usuario debe ser admin del grupo
         const membership = await GroupMember.findOne({
             where: {
-                groupId: req.body.groupId, // El ID del grupo debe coincidir con el enviado en el body
-                userId: req.user.id, // El ID del usuario autenticado debe coincidir
-                // role: 'admin' // Solo los administradores pueden crear tareas
+                groupId: req.body.groupId,
+                userId: req.user.id,
+                // role: 'admin' // Comentado para propósitos de testing
             }
         });
-        if (!membership || membership.role !== 'admin') {
-            return res.status(403).json({ error: 'No tienes permiso para crear tareas en este grupo' });
-        }
         
+        if (!membership || membership.role !== 'admin') {
+            return res.status(403).json({ 
+                error: 'No tienes permiso para crear tareas en este grupo' 
+            });
+        }
 
-        // Extraemos los campos enviados en el body del formulario (HTML o JSON)
-        const { title, description, delivery_date, priority, groupId, assignedTo, status, completedAt } = req.body;
-        const assignedBy = req.user.id; // Asumiendo que el usuario autenticado está en req.user
+        // Extracción y validación de campos obligatorios
+        const { title, description, delivery_date, priority, groupId, assignedTo } = req.body;
+        const assignedBy = req.user.id; // ID del usuario que asigna la tarea
 
         if (!title || !groupId || !assignedTo) {
-            return res.status(400).json({ message: 'title, groupId y assignedTo son obligatorios' });
+            return res.status(400).json({ 
+                message: 'title, groupId y assignedTo son obligatorios' 
+            });
         }
 
-        // Creamos una nueva tarea en la base de datos usando Sequelize
+        // Creación de la tarea en la base de datos
         const tarea = await taskModel.create({
             title,
             description,
@@ -44,25 +59,37 @@ async function newTask(req, res) {
             groupId,
             assignedBy,
             assignedTo,
-            status: status || 'pending',
+            status: status || 'pending',    // Valor por defecto
             completedAt: completedAt || null,
-            createdAt: new Date(),
+            createdAt: new Date(),         // Timestamps manuales
             updatedAt: new Date()
         });
 
-        // Respondemos con estado 201 (creado) y la tarea generada
-        res.status(201).json({ message: 'Tarea creada', tarea });
+        res.status(201).json({ 
+            message: 'Tarea creada', 
+            tarea 
+        });
     } catch (err) {
-        // Si ocurre un error en la base de datos o en los datos enviados, lo capturamos
-        console.error(err);
-
-        // Enviamos un error genérico
-        res.status(500).json({ error: 'Error al crear tarea' });
+        console.error('Error en newTask:', err);
+        res.status(500).json({ 
+            error: 'Error al crear tarea',
+            details: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
     }
 }
 
 /**
- * Controlador para crear un comentario en una tarea
+ * @function addComment
+ * @description Añade un comentario a una tarea con validación de membresía
+ * @param {Object} req - Request con:
+ *   - params: { taskId }
+ *   - body: { comment }
+ *   - user: { id }
+ * @param {Object} res - Response
+ * @returns {Object} JSON con el comentario creado
+ * @throws {400} Si el comentario está vacío
+ * @throws {404} Si la tarea no existe
+ * @throws {403} Si el usuario no es miembro del grupo
  */
 async function addComment(req, res) {
     try {
@@ -70,16 +97,22 @@ async function addComment(req, res) {
         const userId = req.user.id;
         const { comment } = req.body;
 
-        if (!comment) {
-            return res.status(400).json({ message: 'El comentario es obligatorio' });
+        // Validación básica del comentario
+        if (!comment || comment.trim().length === 0) {
+            return res.status(400).json({ 
+                message: 'El comentario no puede estar vacío' 
+            });
         }
 
-        // Verificar que el usuario sea miembro activo del grupo de la tarea
+        // Verificación de existencia de la tarea
         const task = await taskModel.findByPk(taskId);
         if (!task) {
-            return res.status(404).json({ message: 'Tarea no encontrada' });
+            return res.status(404).json({ 
+                message: 'Tarea no encontrada' 
+            });
         }
 
+        // Validación de membresía activa en el grupo
         const membership = await GroupMember.findOne({
             where: {
                 groupId: task.groupId,
@@ -89,25 +122,107 @@ async function addComment(req, res) {
         });
 
         if (!membership) {
-            return res.status(403).json({ message: 'No tienes permiso para comentar esta tarea' });
+            return res.status(403).json({ 
+                message: 'No tienes permiso para comentar esta tarea' 
+            });
         }
 
-        // Crear el comentario
+        // Creación del comentario
         const newComment = await TaskComment.create({
             taskId,
             userId,
-            comment
+            comment: comment.trim() // Limpieza básica del input
         });
 
-        res.status(201).json({ message: 'Comentario agregado', comment: newComment });
+        res.status(201).json({ 
+            message: 'Comentario agregado', 
+            comment: newComment 
+        });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al agregar comentario' });
+        console.error('Error en addComment:', error);
+        res.status(500).json({ 
+            message: 'Error al agregar comentario',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 }
 
 /**
- * Controlador para obtener comentarios de una tarea
+ * @function getTasks
+ * @description Obtiene tareas con filtros opcionales (grupo o asignado)
+ * @param {Object} req - Request con query params:
+ *   - groupId: Filtrar por grupo específico
+ *   - assignedTo: Filtrar por usuario asignado
+ * @param {Object} res - Response
+ * @returns {Object} JSON con array de tareas
+ * @throws {500} Error interno del servidor
+ */
+async function getTasks(req, res) {
+    try {
+        const { groupId, assignedTo } = req.query;
+        const where = {};
+        
+        // Construcción dinámica del WHERE clause
+        if (groupId) where.groupId = groupId;
+        if (assignedTo) where.assignedTo = assignedTo;
+
+        const tareas = await taskModel.findAll({ 
+            where,
+            // Podría añadirse paginación:
+            // limit: parseInt(req.query.limit) || 20,
+            // offset: parseInt(req.query.offset) || 0
+        });
+
+        res.json(tareas);
+    } catch (err) {
+        console.error('Error en getTasks:', err);
+        res.status(500).json({ 
+            error: 'Error al obtener tareas',
+            details: process.env.NODE_ENV === 'development' ? err.message : undefined
+        });
+    }
+}
+
+/**
+ * @function getTaskById
+ * @description Obtiene una tarea específica por ID
+ * @param {Object} req - Request con:
+ *   - params: { id } (ID de la tarea)
+ * @param {Object} res - Response
+ * @returns {Object} JSON con la tarea
+ * @throws {404} Si la tarea no existe
+ * @throws {500} Error interno
+ */
+async function getTaskById(req, res) {
+    try {
+        const { id } = req.params;
+        const tarea = await taskModel.findByPk(id);
+
+        if (!tarea) {
+            return res.status(404).json({ 
+                error: 'Tarea no encontrada',
+                suggestedActions: ['Verificar el ID', 'Consultar lista completa con /tasks']
+            });
+        }
+
+        res.json(tarea);
+    } catch (error) {
+        console.error('Error en getTaskById:', error);
+        res.status(500).json({ 
+            error: 'Error al obtener la tarea',
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+}
+
+/**
+ * @function getComments
+ * @description Obtiene todos los comentarios de una tarea ordenados cronológicamente
+ * @param {Object} req - Request con:
+ *   - params: { taskId }
+ * @param {Object} res - Response
+ * @returns {Object} JSON con array de comentarios
+ * @throws {500} Error interno
  */
 async function getComments(req, res) {
     try {
@@ -115,30 +230,47 @@ async function getComments(req, res) {
 
         const comments = await TaskComment.findAll({
             where: { taskId },
-            order: [['createdAt', 'ASC']]
+            order: [['createdAt', 'ASC']], // Orden ascendente por fecha
+            // Podría incluirse información del usuario:
+            // include: [{ model: User, attributes: ['id', 'name'] }]
         });
 
         res.json(comments);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al obtener comentarios' });
+        console.error('Error en getComments:', error);
+        res.status(500).json({ 
+            message: 'Error al obtener comentarios',
+            systemError: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 }
 
 /**
- * Controlador para marcar una tarea como completada
+ * @function markComplete
+ * @description Marca una tarea como completada con validación de permisos
+ * @param {Object} req - Request con:
+ *   - params: { taskId }
+ *   - user: { id }
+ * @param {Object} res - Response
+ * @returns {Object} JSON con la tarea actualizada
+ * @throws {404} Si la tarea no existe
+ * @throws {403} Si el usuario no tiene permisos
+ * @throws {500} Error interno
  */
 async function markComplete(req, res) {
     try {
         const { taskId } = req.params;
         const userId = req.user.id;
 
-        // Verificar que el usuario sea miembro activo del grupo de la tarea
         const task = await taskModel.findByPk(taskId);
         if (!task) {
-            return res.status(404).json({ message: 'Tarea no encontrada' });
+            return res.status(404).json({ 
+                message: 'Tarea no encontrada',
+                recoverySuggestion: 'Verificar el ID en /tasks'
+            });
         }
 
+        // Validación de membresía activa
         const membership = await GroupMember.findOne({
             where: {
                 groupId: task.groupId,
@@ -148,81 +280,46 @@ async function markComplete(req, res) {
         });
 
         if (!membership) {
-            return res.status(403).json({ message: 'No tienes permiso para modificar esta tarea' });
+            return res.status(403).json({ 
+                message: 'No tienes permiso para modificar esta tarea',
+                requiredRole: 'Miembro activo del grupo'
+            });
         }
 
-        // Actualizar estado y fecha de completado
-        task.status = 'completada';
-        task.completedAt = new Date();
-        await task.save();
+        // Actualización atómica del estado
+        const [affectedRows] = await taskModel.update(
+            { 
+                status: 'completada',
+                completedAt: new Date() 
+            },
+            { 
+                where: { id: taskId },
+                returning: true // Para PostgreSQL
+            }
+        );
 
-        res.json({ message: 'Tarea marcada como completada', task });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al marcar tarea como completada' });
-    }
-}
-
-
-
-/**
- * Controlador para obtener todas las tareas
- * @param {Object} req - Objeto de solicitud HTTP
- * @param {Object} res - Objeto de respuesta HTTP
- * @returns {Promise<Object>} - Respuesta JSON con todas las tareas
- */
-async function getTasks(req, res) {
-    try {
-        const { groupId, assignedTo } = req.query;
-
-        // const userId = req.user.id; // El usuario autenticado
-
-        const where = {};
-        if (groupId) where.groupId = groupId;
-        if (assignedTo) where.assignedTo = assignedTo;
-
-        // Consultamos todas las tareas usando Sequelize con una condicion
-        const tareas = await taskModel.findAll({ where });
-
-        // Devolvemos las tareas como JSON
-        res.json(tareas);
-    } catch (err) {
-        console.error(err);
-
-        // Si hay un error, devolvemos 500 con mensaje de error
-        res.status(500).json({ error: 'Error al obtener tareas' });
-    }
-}
-
-/**
- * Controlador para obtener una tarea por su ID
- * @param {Object} req - Objeto de solicitud HTTP (contiene el ID de la tarea en los parámetros)
- * @param {Object} res - Objeto de respuesta HTTP
- * @returns {Promise<Object>} - Respuesta JSON con la tarea encontrada o error 404 si no existe
- */
-async function getTaskById(req, res) {
-    try {
-        const { id } = req.params; // Trae los parametros de la URL
-
-        // Busca la tarea en la base de datos por su ID o clave primaria
-        const tarea = await taskModel.findByPk(id);
-
-        // Si no encuentra la tarea, devuelve un error 404
-        if (!tarea) {
-            return res.status(404).json({ error: 'Tarea no encontrada' });
+        if (affectedRows === 0) {
+            throw new Error('Ninguna fila actualizada');
         }
 
-        // Devolvemos la tarea encontrada como respuesta, convertida en JSON
-        res.json(tarea);
-
+        res.json({ 
+            message: 'Tarea marcada como completada',
+            task: await taskModel.findByPk(taskId) // Devuelve la versión actualizada
+        });
     } catch (error) {
-        console.error(error); // Si hay un error, lo mostramos convertido en texto
-        res.status(500).json({ error: 'Error al obtener la tarea' });
+        console.error('Error en markComplete:', error);
+        res.status(500).json({ 
+            message: 'Error al marcar tarea como completada',
+            technicalDetails: process.env.NODE_ENV === 'development' ? {
+                error: error.message,
+                stack: error.stack
+            } : undefined
+        });
     }
 }
 
 
-// Exportamos este router para que pueda ser usado en app.js o index.js
+// Exportación de funciones del controlador
 module.exports = {
     newTask,
     getTasks,
@@ -232,17 +329,10 @@ module.exports = {
     markComplete,
 };
 
-/*¿Dónde se conecta esto?
-En tu archivo app.js o server.js, lo usás así:
-
-const express = require('express');
-const app = express();
-const tareasRoutes = require('./routes/taskModels'); // ruta a este archivo
-
-app.use(express.json()); // Middleware para leer JSON en las peticiones
-app.use('/api/taskModels', tareasRoutes); // Tu ruta queda activa en /api/tareas
-
-Entonces, si tu frontend hace un POST a http://localhost:3000/api/tareas, 
-este endpoint va a procesar la solicitud y crear la tarea en PostgreSQL.
-
+/* Configuración de ruteo recomendada:
+   const router = express.Router();
+   router.post('/tasks', taskController.newTask);
+   router.get('/tasks/:id/comments', taskController.getComments);
+   ...
+   app.use('/api/v1', router);
 */
