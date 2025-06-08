@@ -45,38 +45,84 @@ async function loadTasks() {
         const expClass = (diffDays <= 1 && diffDays >= 0 && !task.completed) ? 'expiring-soon' : '';
 
         const html = `
-        <div class="row align-items-center task-item ${completedClass}">
-          <div class="col-auto">
-            <img src="https://cdn-icons-png.flaticon.com/512/3209/3209265.png" alt="Task Icon" class="task-img">
-          </div>
-          <div class="col">
-            <h5 class="mb-0">${task.title}</h5>
-            <p class="text-muted mb-0">${task.description}</p> 
-          </div>
-          <div class="col-auto task-meta">
-            <div class="d-flex align-items-start gap-2">
-              <div class="dropdown text-end mt-2">
-                <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton"
-                  data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="bi bi-three-dots-vertical"></i> 
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})">Editar</a></li>
-                  <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask()">Eliminar</a></li>
-                </ul>
-              </div>
-              <div>
-                <strong>Prioridad: ${task.priority}</strong><br>
-                <span class="${expClass}">Exp: ${task.delivery_date}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-  `     ;    
+         <div class="row align-items-center task-item ${completedClass}">
+           <div class="col-auto">
+             <input type="checkbox" class="form-check-input" id="taskCheckbox-${task.id}" 
+               ${task.completed ? 'checked' : ''} 
+               onchange="toggleTaskCompletion(${task.id}, this)">
+           </div>
+           <div class="col">
+             <h5 class="mb-0">${task.title}</h5>
+             <p class="text-muted mb-0">${task.description}</p> 
+           </div>
+           <div class="col-auto task-meta">
+             <div class="d-flex align-items-start gap-2">
+               <div class="dropdown text-end mt-2">
+                 <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                   <i class="bi bi-three-dots-vertical"></i> 
+                 </button>
+                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                   <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})">Editar</a></li>
+                   <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask()">Eliminar</a></li>
+                 </ul>
+               </div>
+               <div>
+                 <strong>Prioridad: ${task.priority}</strong><br>
+                 <span class="status-box ${expClass}" id="taskExpiration-${task.id}">
+                   Exp: ${task.delivery_date}
+                 </span>
+               </div>
+             </div>
+           </div>
+         </div>
+`       ;   
         list.innerHTML += html; //Carga dinámicamente el HTML de cada tarea en la lista del frontend
       });
     } catch (error) {
       console.error('Error cargando tareas:', error);
+    }
+  }
+
+  async function toggleTaskCompletion(taskId, checkbox) {
+    const isCompleted = checkbox.checked; // Obtener el estado del checkbox
+    const expirationElement = document.getElementById(`taskExpiration-${taskId}`);
+  
+    // Cambiar el color del contenedor de la fecha de expiración
+    if (isCompleted) {
+      expirationElement.classList.remove('expiring-soon'); // Quita el rojo si está presente
+      expirationElement.classList.add('bg-success'); // Agrega el verde
+    } else {
+      expirationElement.classList.remove('bg-success'); // Quita el verde
+  
+      // Reaplica el rojo si la tarea está por vencer
+      const today = new Date();
+      const dueDate = new Date(expirationElement.textContent.split(': ')[1]); // Extrae la fecha
+      const diffTime = dueDate.getTime() - today.setHours(0, 0, 0, 0);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+      if (diffDays <= 1 && diffDays >= 0) {
+        expirationElement.classList.add('expiring-soon'); // Vuelve a agregar el rojo
+      }
+    }
+  
+    // Enviar la actualización al backend
+    try {
+      const res = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: isCompleted }) // Enviar el estado como JSON
+      });
+  
+      if (!res.ok) {
+        throw new Error('Error al actualizar el estado de la tarea');
+      }
+
+      const data = await res.json();
+      console.log('Tarea actualizada:', data);
+    } catch (error) {
+      console.error(error);
+      alert('No se pudo actualizar el estado de la tarea.');
     }
   }
 
@@ -94,7 +140,7 @@ async function editTask(id) {
   }
 
   try {
-    const res = await fetch(`/api/tasks/${id}`, { // Se utiliza para que el frontend se comunique con el backend o con cualquier API.
+    const res = await fetch(`http://localhost:3000/api/tasks/${id}`, { // Se utiliza para que el frontend se comunique con el backend o con cualquier API.
       method: 'PUT', // Método HTTP para actualizar
       headers: { 'Content-Type': 'application/json' }, // Indica que el cuerpo de la petición es JSON
       body: JSON.stringify({ // Se encarga de enviar datos al servidor en formato JSON.

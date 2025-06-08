@@ -83,6 +83,36 @@ async function getTaskById(req, res) {
     }
 }
 
+  async function updateTask(req, res) {
+    try {
+      const { id } = req.params; // ID de la tarea desde los parámetros de la URL
+      const { completed } = req.body; // Campo `completed` desde el cuerpo de la solicitud
+  
+      // Validar que el campo `completed` sea booleano
+      if (typeof completed !== 'boolean') {
+        return res.status(400).json({ error: 'El campo "completed" debe ser true o false.' });
+      }
+  
+      // Buscar la tarea en la base de datos
+      const task = await taskModel.findByPk(id);
+  
+      // Si no se encuentra la tarea, devolver un error 404
+      if (!task) {
+        return res.status(404).json({ error: 'Tarea no encontrada.' });
+      }
+  
+      // Actualizar el campo `completed`
+      task.completed = completed;
+      await task.save();
+  
+      // Responder con la tarea actualizada
+      res.json({ mensaje: 'Tarea actualizada correctamente.', task });
+    } catch (error) {
+      console.error('Error al actualizar la tarea:', error);
+      res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+  }
+
 // // Ruta PUT para modificar solo la descripción y fecha de entrega de una tarea
 // router.put('/:id', async (req, res) => {
 //   try {
@@ -119,7 +149,7 @@ module.exports = {
     newTask,
     getTasks,
     getTaskById,
-    // updateTask
+    updateTask
 };
 
 /*¿Dónde se conecta esto?
