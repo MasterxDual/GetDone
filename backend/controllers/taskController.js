@@ -43,6 +43,7 @@ async function newTask(req, res) {
         // Extracción y validación de campos obligatorios
         const { title, description, delivery_date, priority, groupId, assignedTo } = req.body;
         const assignedBy = req.user.id; // ID del usuario que asigna la tarea
+        const status = 'pending'; // Valor por defecto para el estado de la tarea
 
         if (!title || !groupId || !assignedTo) {
             return res.status(400).json({ 
@@ -52,17 +53,17 @@ async function newTask(req, res) {
 
         // Creación de la tarea en la base de datos
         const tarea = await taskModel.create({
-            title,
-            description,
-            delivery_date,
-            priority,
-            groupId,
-            assignedBy,
-            assignedTo,
-            status: 'pending',    // Valor por defecto
-            completedAt: completedAt || null,
-            createdAt: new Date(),         // Timestamps manuales
-            updatedAt: new Date()
+          title,
+          description,
+          delivery_date,
+          priority,
+          groupId,
+          assignedBy,
+          assignedTo,
+          status,
+          completedAt: null,
+          createdAt: new Date(),         // Timestamps manuales
+          updatedAt: new Date()
         });
 
         res.status(201).json({ 
