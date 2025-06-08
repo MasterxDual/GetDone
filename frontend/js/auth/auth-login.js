@@ -36,9 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || 'Error al iniciar sesión');
             }
 
+            // Guarda el token en localStorage
+            localStorage.setItem('token', data.token);
+            // Guarda el userId en localStorage
+            localStorage.setItem('userId', data.user.id); // <-- asegúrate que data.user.id existe
+
+
             console.log('Login exitoso:', data);
 
-            window.location.href = '/views/user/tasklist.html';
+            window.location.href = '/views/user/home.html';
 
         } catch (error) {
             console.error('Error:', error);

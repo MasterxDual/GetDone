@@ -20,8 +20,6 @@ const sequelize = new Sequelize(
         dialect: 'postgres',        // Tipo de base de datos (en este caso PostgreSQL)
 
         logging: false, // Desactiva los logs de Sequelize en consola (útil en producción para evitar ruido)
-        // Opcional: Configuraciones adicionales (ej: pool de conexiones, logging)
-        // pool: { max: 5, min: 0, idle: 10000 }, // Configuración del pool de conexiones
     }
 );
 

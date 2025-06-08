@@ -8,7 +8,12 @@ const sequelize = require('../config/sequelize');
 
 // Definimos el modelo 'Tarea' usando sequelize.define()
 // Este modelo representa una tabla llamada 'Tareas' en la base de datos (Sequelize pluraliza por defecto)
-const Tarea = sequelize.define('Tarea', {
+const Task = sequelize.define('Task', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   // Campo 'title' de tipo texto corto, obligatorio
   title: {
     type: DataTypes.STRING,
@@ -17,6 +22,34 @@ const Tarea = sequelize.define('Tarea', {
   // Campo 'description' de tipo texto largo, opcional
   description: {
     type: DataTypes.TEXT
+  },
+  groupId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'groups',
+      key: 'id'
+    }
+  },
+  assignedBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
+  assignedTo: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
+    status: {
+      type: DataTypes.ENUM('pending', 'in_progress', 'completed', 'cancelled'),
+      defaultValue: 'pending'
   },
   // Campo 'delivery_date' para almacenar solo la fecha (sin hora), obligatorio
   delivery_date: {
@@ -28,11 +61,10 @@ const Tarea = sequelize.define('Tarea', {
     type: DataTypes.ENUM('Alta', 'Media', 'Baja'),
     allowNull: false
   },
-  completed: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
-  } 
+  // Campo 'completedAt' para almacenar la fecha de finalización, opcional
+  completedAt: {
+    type: DataTypes.DATE
+  }
 }, { // Configuración adicional para el modelo
 
   tableName: 'tasks',             // Definimos el nombre de la tabla en la base de datos
@@ -44,6 +76,6 @@ const Tarea = sequelize.define('Tarea', {
 });
 
 // Exportamos el modelo para poder usarlo en rutas, controladores o scripts
-module.exports = Tarea;
+module.exports = Task;
 
 /* Cuando se ejecuta sequelize.sync(), Sequelize crea (o actualiza) una tabla con la estructura definida anteriormente */
