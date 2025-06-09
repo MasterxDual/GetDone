@@ -109,15 +109,11 @@ async function login(req, res) {
             return res.status(401).json({ error: 'Credenciales invalidas' });
         }
 
-
-        /* TODO: Aca usar una variable de entorno */
-        // const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
-
         // Si todo es correcto, generar token de sesión JWT
         const token = jwt.sign(
             { id: user.id, email: user.email },
             process.env.JWT_SECRET,
-            { expiresIn: '1h' }
+            { expiresIn: '10m' } // Expira en 10 minutos
         );
 
         res.json({

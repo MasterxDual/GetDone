@@ -39,7 +39,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link" href="settings.html">
                         <i class="bi bi-gear fs-5"></i>
                         Settings
                     </a>
@@ -53,7 +53,7 @@
             <div class="header d-flex justify-content-between align-items-center">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item active">Panel de Administrador del Grupo</li>
+                        <li class="breadcrumb-item active">Group Administrator Panel</li>
                         <!-- <li class="breadcrumb-item"><a class="link-create-group" href="#">Create Group</a></li> -->
                     </ol>
                 </nav>
@@ -70,7 +70,12 @@
                     </a>
                     <!-- Avatar de Usuario -->
                     <div class="user-avatar">
-                        <a href="#"><i class="bi bi-person-circle fs-4"></i></a>
+                      <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Cerrar Sesión</a></li>
+                      </ul>
                     </div>
                     <!-- <a href="#"><img src="#" alt="user" width="30" height="30" class="rounded-circle ms-2"></a> Perfil de Usuario -->
                 </form>
@@ -84,12 +89,12 @@
                     
                     <hr>
                     <!-- Invitar a otros usuarios -->
-                    <h4>Invitar Usuarios</h4>
+                    <h4>Invite Users</h4>
                     <!-- Codigo de Invitacion -->
                     <p>
-                        <strong>Código de invitación:</strong>
+                        <strong>Invitation Code:</strong>
                         <span id="inviteCode" class="fw-bold"></span>
-                        <button class="btn btn-outline-secondary btn-sm ms-2" id="copyInviteCodeBtn">Copiar</button>
+                        <button class="btn btn-outline-secondary btn-sm ms-2" id="copyInviteCodeBtn">Copy</button>
                     </p>
                 </div>
 
@@ -103,14 +108,14 @@
                 <!-- </form> -->
                 <hr>
                 <!-- Lista de Integrantes -->
-                <h4>Integrantes del Grupo</h4>
+                <h4>Group members</h4>
                 <ul id="membersList" class="list-group mb-4">
                     <!-- Aquí se listarán los integrantes dinamicamente-->
                 </ul>
 
                 
-                <h4>Tareas del Grupo</h4>
-                <button id="createTaskBtn" class="btn btn-success mb-3" onclick="goToCreateTask()">Crear Nueva Tarea</button>
+                <h4>Group Tasks</h4>
+                <button id="createTaskBtn" class="btn btn-success mb-3" onclick="goToCreateTask()">Create new Task</button>
                 <!-- Lista de Tareas -->
                 <div class="task-list" id="taskList">
                     <!-- Aqui el Script se encarga de crear las tareas -->
@@ -123,6 +128,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
     <!-- Script Personalizado -->
     <script src="../../js/auth/checkAuth.js"></script>
+    <script src="../../js/auth/logout.js"></script>
     <script src="../../js/tasks-list.js"></script>
     <script src="../../js/group-admin.js"></script>
 </body>
