@@ -1,3 +1,5 @@
+requireAuth();
+
 async function loadTasks() {
     try {
       const token = localStorage.getItem('token');

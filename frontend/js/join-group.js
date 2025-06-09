@@ -1,3 +1,5 @@
+requireAuth();
+
 /**
  * @event DOMContentLoaded
  * @description Configura el formulario para unirse a un grupo cuando el DOM está completamente cargado
