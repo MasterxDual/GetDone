@@ -9,6 +9,6 @@ function requireAuth() {
     if (!token) {
         alert('Debes iniciar sesión para acceder a esta página.');
         // Redirige a la página de inicio de sesión
-        window.location.href = '/frontend/views/auth/login.html';
+        window.location.href = '../../views/auth/login.html';
     }
 }

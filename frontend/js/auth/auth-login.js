@@ -1,3 +1,5 @@
+// Limpia el localStorage al cargar la página
+localStorage.clear();
 document.addEventListener('DOMContentLoaded', () => {
 
     // Seleccionar el formulario de Login

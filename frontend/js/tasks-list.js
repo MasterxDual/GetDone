@@ -7,6 +7,10 @@ async function loadTasks() {
       const userId = localStorage.getItem('userId');
       const role = localStorage.getItem('selectedGroupRole'); // Obtengo el rol
 
+      console.log('Rol de usuario:', role);
+      console.log('Grupo ID:', groupId);
+      console.log('Usuario ID:', userId);
+
       if (!groupId || !userId) {
           alert('No se encontró el grupo actual o el usuario.');
           return;
@@ -18,11 +22,20 @@ async function loadTasks() {
         url += `&assignedTo=${userId}`;
       }
 
+      console.log('URL para obtener tareas:', url);
+
       const res = await fetch(url, {
           headers: {
               'Authorization': `Bearer ${token}`
           }
       });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error('Error en la respuesta de tareas:', res.status, errorText);
+        alert('Error al cargar las tareas: ' + res.status);
+        return;
+      }
 
       const tasks = await res.json();
       const list = document.getElementById('taskList');
@@ -33,6 +46,14 @@ async function loadTasks() {
         const commentsRes = await fetch(`http://localhost:3000/api/tasks/${task.id}/comments`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
+
+        if (!commentsRes.ok) {
+          const errorText = await commentsRes.text();
+          console.error('Error en la respuesta de comentarios:', commentsRes.status, errorText);
+          alert('Error al cargar los comentarios: ' + commentsRes.status);
+          return;
+        }
+
         const comments = await commentsRes.json();
 
         // Construir HTML de comentarios
@@ -46,15 +67,6 @@ async function loadTasks() {
             <button type="submit">Enviar</button>
           </form>
         </div>`;
-
-        /* // Botón para marcar completada si no está completada
-        let completeButton = '';
-        if (task.status !== 'completada') {
-          completeButton = `<button onclick="markComplete(${task.id})">Marcar como completada</button>`;
-        } else {
-          completeButton = `<span>Tarea completada</span>`;
-        } */
-
 
         const completedClass = task.completed ? 'completed' : '';
       
@@ -92,7 +104,8 @@ async function loadTasks() {
                 <div class="d-flex align-items-center gap-2">
                   <input type="checkbox" class="form-check-input me-2" id="taskCheckbox-${task.id}" 
                     ${task.completed ? 'checked' : ''} 
-                    onchange="toggleTaskCompletion(${task.id}, this)">
+                    onchange="toggleTaskCompletion(${task.id}, this)" 
+                    ${role !== 'admin' && role !== 'member' ? 'disabled' : ''} >
                   <span class="status-box ${expClass}" id="taskExpiration-${task.id}">
                     <i class="bi bi-calendar-event"></i> Exp: ${task.delivery_date}
                   </span>
@@ -105,8 +118,10 @@ async function loadTasks() {
                     <i class="bi bi-three-dots-vertical"></i>
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${task.id}">
+                    ${role === 'admin' ? `
                     <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})">Editar</a></li>
-                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask()">Eliminar</a></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask(${task.id})">Eliminar</a></li>
+                    ` : ''}
                   </ul>
                 </div>
               </div>
@@ -176,9 +191,13 @@ async function toggleTaskCompletion(taskId, checkbox) {
 
   // Enviar la actualización al backend
   try {
+    const token = localStorage.getItem('token');
     const res = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ completed: isCompleted }) // Enviar el estado como JSON
     });
 
@@ -195,50 +214,55 @@ async function toggleTaskCompletion(taskId, checkbox) {
 }
 
 async function editTask(id) {
-const newDescription = prompt("Nueva descripción de la tarea:"); //Recibe la nueva descripción de la tarea
-
-if (!newDescription) return;
-
-const newDate = prompt("Nueva fecha de vencimiento (YYYY-MM-DD):"); //Recibe la nueva fecha de vencimiento
-
-//Valida que la fecha tenga el formato correcto
-if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
-  alert("Fecha inválida. Debe tener el formato YYYY-MM-DD.");
-  return;
-}
-
-try {
-  const res = await fetch(`http://localhost:3000/api/tasks/${id}`, { // Se utiliza para que el frontend se comunique con el backend o con cualquier API.
-    method: 'PUT', // Método HTTP para actualizar
-    headers: { 'Content-Type': 'application/json' }, // Indica que el cuerpo de la petición es JSON
-    body: JSON.stringify({ // Se encarga de enviar datos al servidor en formato JSON.
-      description: newDescription,
-      delivery_date: newDate
-    })
-  });
-
-  const data = await res.json(); //Espera a que el servidor responda y convierte ese JSON en un objeto usable en JavaScript
-
-  if (res.ok) {
-    alert(data.mensaje); // Muestra en pantalla el mensaje que devolvió el backend ("Tarea actualizada correctamente")
-    loadTasks(); // Refrescar la lista dinámicamente
-  } else {
-    alert("Error: " + data.error);
+  const newDescription = prompt("Nueva descripción de la tarea:"); //Recibe la nueva descripción de la tarea
+  
+  if (!newDescription) return;
+  
+  const newDate = prompt("Nueva fecha de vencimiento (YYYY-MM-DD):"); //Recibe la nueva fecha de vencimiento
+  
+  //Valida que la fecha tenga el formato correcto
+  if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+    alert("Fecha inválida. Debe tener el formato YYYY-MM-DD.");
+    return;
   }
-
-} catch (error) {
-  console.error(error);
-  alert("Error al actualizar la tarea.");
-}
-}
-
-
-/* async function markComplete(taskId) {
-  const token = localStorage.getItem('token');
-
+  
   try {
-    const res = await fetch(`http://localhost:3000/api/tasks/${taskId}/complete`, {
-      method: 'PATCH',
+    const token = localStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/tasks/${id}`, { // Se utiliza para que el frontend se comunique con el backend o con cualquier API.
+      method: 'PUT', // Método HTTP para actualizar
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }, // Indica que el cuerpo de la petición es JSON
+      body: JSON.stringify({ // Se encarga de enviar datos al servidor en formato JSON.
+        description: newDescription,
+        delivery_date: newDate
+      })
+    });
+  
+    const data = await res.json(); //Espera a que el servidor responda y convierte ese JSON en un objeto usable en JavaScript
+  
+    if (res.ok) {
+      alert(data.mensaje); // Muestra en pantalla el mensaje que devolvió el backend ("Tarea actualizada correctamente")
+      loadTasks(); // Refrescar la lista dinámicamente
+    } else {
+      alert("Error: " + data.error);
+    }
+  
+  } catch (error) {
+    console.error(error);
+    alert("Error al actualizar la tarea.");
+  }
+}
+
+async function deleteTask(id) {
+  if (!confirm('¿Está seguro que desea eliminar esta tarea?')) {
+    return;
+  }
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/tasks/${id}`, {
+      method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -246,15 +270,17 @@ try {
 
     if (!res.ok) {
       const data = await res.json();
-      alert('Error al marcar completada: ' + (data.message || 'Error desconocido'));
+      alert('Error al eliminar la tarea: ' + (data.message || 'Error desconocido'));
       return;
     }
 
-    loadTasks(); // Recargar tareas para actualizar estado
+    alert('Tarea eliminada correctamente');
+    loadTasks(); // Recargar lista de tareas
   } catch (error) {
-    console.error('Error marcando completada:', error);
+    console.error('Error eliminando tarea:', error);
+    alert('No se pudo eliminar la tarea.');
   }
-} */
+}
 
 // Función para cargar tareas
 function goToCreateTask() {

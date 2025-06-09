@@ -39,7 +39,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">
+                    <a class="nav-link" href="settings.html">
                         <i class="bi bi-gear fs-5"></i>
                         Settings
                     </a>
@@ -70,7 +70,12 @@
                     </a>
                     <!-- Avatar de Usuario -->
                     <div class="user-avatar">
-                        <a href="#"><i class="bi bi-person-circle fs-4"></i></a>
+                      <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Cerrar Sesión</a></li>
+                      </ul>
                     </div>
                     <!-- <a href="#"><img src="#" alt="user" width="30" height="30" class="rounded-circle ms-2"></a> Perfil de Usuario -->
                 </form>
@@ -106,6 +111,7 @@
 
     <!-- JavaScript Personalizado -->
     <script src="../../js/auth/checkAuth.js"></script>
+    <script src="../../js/auth/logout.js"></script>
     <script src="../../js/groups.js"></script>
 </body>
 </html>
