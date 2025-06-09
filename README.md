@@ -114,10 +114,9 @@ Por convención: Todos los comandos `npm` deben ejecutarse dentro de la carpeta 
 
 6. Abrir la app:
 
-Nos ubicamos en la carpeta de frontend e ingresamos el siguiente comando:
-```bash
-    npx live-server
-```
+    Abrir la siguiente direccion: [http://localhost:3000](http://localhost:3000).
+
+---
 
 ### 3. Configura el frontend
 
