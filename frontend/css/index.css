@@ -1,5 +1,6 @@
 :root {
     --primary-color: #0b6ad5;
+    --secondary-color: #000000;
     --primary-hover: #000000;
     --text-muted: #6b7280;
     --border-radius: 0.75rem;
@@ -56,7 +57,7 @@ body {
 .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
-    color: var(--primary-color);
+    color: var(--secondary-color);
     margin-bottom: 1.5rem;
     line-height: 1.1;
 }
@@ -127,7 +128,7 @@ body {
 .feature-title {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--secondary-color);
     margin-bottom: 1rem;
 }
 
@@ -144,7 +145,7 @@ body {
 .section-title {
     font-size: 2.5rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--secondary-color);
     margin-bottom: 1rem;
 }
 
