@@ -7,6 +7,17 @@ const router = express.Router();
 // Importa los controladores de usuario que controlan la logica de los Endpoints
 const userController = require("../controllers/userController");
 
+// Importa el controlador de correo electrónico para enviar códigos de verificación
+const emailController = require("../controllers/emailController");
+
+/**
+ * Ruta para enviar el código de verificación por correo electrónico
+ * @api {POST} /api/users/sendVerificationCode
+ * @apiName SendVerificationCode
+ * @apiGroup Users
+ */
+router.post('/sendVerificationCode', emailController.sendVerificationCode);
+
 /**
  * Ruta para registrar un nuevo usuario
  * @api {POST} /api/users/register
