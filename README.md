@@ -85,7 +85,12 @@ Por convención: Todos los comandos `npm` deben ejecutarse dentro de la carpeta 
     DB_HOST=localhost
     PORT=3000
 
+    # Variables de entorno para la configuración de JWT
     JWT_SECRET=tu_clave_secreta
+
+    # Variables de entorno para la configuración del correo electrónico
+    EMAIL_USER=tu_correo@getdone.com
+    EMAIL_PASS=clave_de_aplicacion
     ```
     Puedes crear un token aleatorio para usar como clave con el siguiente comando desde la Terminal de Linux:
     ```bash
