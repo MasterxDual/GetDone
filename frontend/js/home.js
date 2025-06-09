@@ -1,3 +1,5 @@
+requireAuth();
+
 /**
  * @constant DIR
  * @description URL base para las peticiones a la API de grupos

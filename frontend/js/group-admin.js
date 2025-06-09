@@ -1,3 +1,5 @@
+requireAuth();
+
 /**
  * @function loadGroupInfo
  * @description Carga y muestra la información de un grupo específico y sus miembros

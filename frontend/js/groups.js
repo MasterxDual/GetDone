@@ -1,3 +1,5 @@
+requireAuth();
+
 // Obtiene el formulario por su ID y añade un event listener para el evento 'submit'
 document.getElementById('formGroup').addEventListener('submit', async function (e) {
     // Previene el comportamiento por defecto del formulario (recarga de página)

@@ -85,7 +85,12 @@ Por convención: Todos los comandos `npm` deben ejecutarse dentro de la carpeta 
     DB_HOST=localhost
     PORT=3000
 
+    # Variables de entorno para la configuración de JWT
     JWT_SECRET=tu_clave_secreta
+
+    # Variables de entorno para la configuración del correo electrónico
+    EMAIL_USER=tu_correo@getdone.com
+    EMAIL_PASS=clave_de_aplicacion
     ```
     Puedes crear un token aleatorio para usar como clave con el siguiente comando desde la Terminal de Linux:
     ```bash
@@ -114,10 +119,9 @@ Por convención: Todos los comandos `npm` deben ejecutarse dentro de la carpeta 
 
 6. Abrir la app:
 
-Nos ubicamos en la carpeta de frontend e ingresamos el siguiente comando:
-```bash
-    npx live-server
-```
+    Abrir la siguiente direccion: [http://localhost:3000](http://localhost:3000).
+
+---
 
 ### 3. Configura el frontend
 

@@ -1,3 +1,5 @@
+requireAuth();
+
 /**
  * @function loadGroupInfo
  * @description Carga y muestra la información básica de un grupo desde la API

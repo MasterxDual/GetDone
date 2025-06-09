@@ -1,3 +1,5 @@
+requireAuth();
+
 /**
  * @function loadGroupUsers
  * @description Carga los miembros de un grupo y los muestra en un elemento select

@@ -7,9 +7,96 @@ document.addEventListener('DOMContentLoaded', () => {
     // Seleccionar el formulario de Registro
     const form = document.getElementById('registerForm');
 
+    // Disable all fields except firstName, lastName, email initially
+    const fieldsToDisable = ['password', 'confirmPassword', 'showPassword', 'showConfirmPassword'];
+    fieldsToDisable.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
+    });
+
+    // Also disable other fields if any (assuming only these fields for now)
+    // Add a new input for verification code and a button to send code
+    // Assuming these elements exist in the HTML with ids 'verificationCode' and 'sendCodeBtn'
+    const verificationCodeInput = document.getElementById('verificationCode');
+    const sendCodeBtn = document.getElementById('sendCodeBtn');
+
+    if (verificationCodeInput) verificationCodeInput.disabled = true;
+
+    let generatedCode = null;
+    let emailVerified = false;
+
+    // Function to generate 4-digit random code
+    function generateCode() {
+        return Math.floor(1000 + Math.random() * 9000).toString();
+    }
+
+    // Event listener for send code button
+    if (sendCodeBtn) {
+        sendCodeBtn.addEventListener('click', async () => {
+            const email = form.email.value.trim().toLowerCase();
+            if (!email) {
+                mostrarMensaje('Por favor, ingresa un correo electrónico válido para enviar el código.');
+                return;
+            }
+            generatedCode = generateCode();
+            // console.log('Código generado:', generatedCode); // For debugging, remove in production
+
+            try {
+                // Send the code to backend to email the user
+                const response = await fetch('http://localhost:3000/api/users/sendVerificationCode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, code: generatedCode })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    mostrarMensaje('Código de verificación enviado a tu correo electrónico.', 'success');
+                    if (verificationCodeInput) verificationCodeInput.disabled = false;
+                } else {
+                    mostrarMensaje(data.message || 'Error al enviar el código. Intenta nuevamente.');
+                }
+            } catch (error) {
+                console.error('Error al enviar código:', error);
+                mostrarMensaje('Error al enviar el código. Intenta nuevamente.');
+            }
+        });
+    }
+
+    // Event listener for verification code input to validate code
+    if (verificationCodeInput) {
+        verificationCodeInput.addEventListener('input', () => {
+            const enteredCode = verificationCodeInput.value.trim();
+            if (enteredCode.length === 4) {
+                if (enteredCode === generatedCode) {
+                    emailVerified = true;
+                    mostrarMensaje('Correo electrónico verificado correctamente.', 'success');
+                    // Enable password fields and show/hide buttons
+                    fieldsToDisable.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.disabled = false;
+                    });
+                    verificationCodeInput.disabled = true;
+                    sendCodeBtn.disabled = true;
+                } else {
+                    emailVerified = false;
+                    mostrarMensaje('Código incorrecto. Por favor, verifica e intenta nuevamente.');
+                }
+            }
+        });
+    }
+
     // Escuchar el evento submit del formulario
     form.addEventListener('submit', async (e) => {
         e.preventDefault(); // Evitar que se recargue la pagina al enviar el formulario
+
+        if (!emailVerified) {
+            mostrarMensaje('Por favor, verifica tu correo electrónico antes de registrarte.');
+            return;
+        }
 
         const password = form.password.value; // Capturar la contraseña de usuario
         const confirmPassword = form.confirmPassword.value; // Capturar la confirmacion de contraseña de usuario

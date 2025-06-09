@@ -4,8 +4,13 @@
 const express = require("express");
 const router = express.Router();
 
+const authenticateToken = require('../middleware/authMiddleware');
+
 // Importa los controladores de tareas que controlan la logica de los Endpoints
 const taskController = require("../controllers/taskController");
+
+// Middleware para proteger todas las rutas de tareas
+router.use(authenticateToken);
 
 /**
  * Ruta para crear una nueva tarea

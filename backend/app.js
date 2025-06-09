@@ -35,12 +35,32 @@ app.use(express.json()); // Permite el parseo de JSON en las solicitudes
 // Middleware que permite leer datos enviados desde formularios HTML (form-urlencoded)
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static(path.join(__dirname, '../frontend')));
+
 // // Middleware para servir archivos estáticos desde la carpeta 'public'
 // // Esto permite acceder al HTML, CSS y JS del frontend sin rutas adicionales
 // app.use(express.static('frontend'));
 
-// Servir toda la carpeta frontend como estática
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Servir solo archivos públicos (login, registro, index) sin autenticación
+app.use('/public', express.static(path.join(__dirname, '../frontend')));
+
+// Rutas protegidas para vistas de usuario
+app.get('/views/user/:page', authenticateToken, (req, res) => {
+    const page = req.params.page;
+    res.sendFile(path.join(__dirname, '../frontend/views/user', page));
+});
+
+// Rutas protegidas para vistas de administrador (si aplica)
+app.get('/views/admin/:page', authenticateToken, (req, res) => {
+    const page = req.params.page;
+    res.sendFile(path.join(__dirname, '../frontend/views/admin', page));
+});
+
+// Ruta para login y registro sin autenticación
+app.get('/views/auth/:page', (req, res) => {
+    const page = req.params.page;
+    res.sendFile(path.join(__dirname, '../frontend/views/auth', page));
+});
 
 // Configuracion de rutas
 app.use('/api/users', userRoutes); // Monta la rutas de usuarios bajo /api/users

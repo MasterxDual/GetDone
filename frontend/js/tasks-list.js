@@ -1,3 +1,5 @@
+requireAuth();
+
 async function loadTasks() {
     try {
       const token = localStorage.getItem('token');
@@ -64,41 +66,57 @@ async function loadTasks() {
 
         // Si falta 1 día o menos, aplicar clase de expiración
         const expClass = (diffDays <= 1 && diffDays >= 0 && !task.completed) ? 'expiring-soon' : '';
-  
+
+        // Asignar color de badge según prioridad
+        const priorityColors = {
+          'Alta': 'danger',
+          'Media': 'warning',
+          'Baja': 'success'
+        };
+        // Si la prioridad no está definida, usar 'secondary' como valor por defecto
+        const priorityBadge = priorityColors[task.priority] || 'secondary';
+
+        // Construir el HTML de la tarea
         const html = `
-         <div class="row align-items-center task-item ${completedClass}">
-           <div class="col-auto">
-             <input type="checkbox" class="form-check-input" id="taskCheckbox-${task.id}" 
-               ${task.completed ? 'checked' : ''} 
-               onchange="toggleTaskCompletion(${task.id}, this)">
-           </div>
-           <div class="col">
-             <h5 class="mb-0">${task.title}</h5>
-             <p class="text-muted mb-0">${task.description}</p> 
-           </div>
-           <div class="col-auto task-meta">
-             <div class="d-flex align-items-start gap-2">
-               <div class="dropdown text-end mt-2">
-                 <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton"
-                   data-bs-toggle="dropdown" aria-expanded="false">
-                   <i class="bi bi-three-dots-vertical"></i> 
-                 </button>
-                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                   <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})">Editar</a></li>
-                   <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask()">Eliminar</a></li>
-                 </ul>
-               </div>
-               <div>
-                 <strong>Prioridad: ${task.priority}</strong><br>
-                 <span class="status-box ${expClass}" id="taskExpiration-${task.id}">
-                   Exp: ${task.delivery_date}
-                 </span>
-               </div>
-             </div>
-           </div>
-         </div>
-`       ;   
-        list.innerHTML += html; //Carga dinámicamente el HTML de cada tarea en la lista del frontend
+          <div class="card mb-3 shadow-sm border-0">
+            <div class="card-body d-flex align-items-center">
+              <div class="me-3">
+                <i class="bi bi-list-check fs-2 text-primary"></i>
+              </div>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center">
+                  <h5 class="card-title mb-1">${task.title}</h5>
+                  <span class="badge bg-${priorityBadge}">${task.priority}</span>
+                </div>
+                <p class="card-text text-muted mb-2">${task.description}</p>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="checkbox" class="form-check-input me-2" id="taskCheckbox-${task.id}" 
+                    ${task.completed ? 'checked' : ''} 
+                    onchange="toggleTaskCompletion(${task.id}, this)">
+                  <span class="status-box ${expClass}" id="taskExpiration-${task.id}">
+                    <i class="bi bi-calendar-event"></i> Exp: ${task.delivery_date}
+                  </span>
+                </div>
+              </div>
+              <div class="ms-3">
+                <div class="dropdown">
+                  <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton${task.id}"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${task.id}">
+                    <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})">Editar</a></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask()">Eliminar</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer bg-white border-0 pt-0">
+              ${commentsHtml}
+            </div>
+          </div>
+        `;
+        list.innerHTML += html;
       }
     } catch (error) {
       console.error('Error cargando tareas:', error);
