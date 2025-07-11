@@ -58,9 +58,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const lastName = form.lastName.value.trim();
             const email = form.email.value.trim().toLowerCase();
 
-            //Validación de campos
+            /* //Validación de campos
             if (!email || !/^\S+@\S+\.\S+$/.test(email) || !firstName || !lastName) {
                 mostrarMensaje('Por favor, completa todos los campos (Nombre completo y email)', 'danger');
+                return;
+            }
+            */
+            
+            //Validación de campos
+            //Muestra mensajes nativos de validación, al igual que se muestra en la contraseña nueva y en la confirmación de contraseña nueva
+            if (!form.checkValidity()) {
+                form.reportValidity(); 
                 return;
             }
 
