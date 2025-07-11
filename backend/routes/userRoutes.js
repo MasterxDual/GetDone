@@ -27,6 +27,15 @@ router.post('/sendVerificationCode', emailController.sendVerificationCode);
  */
 router.post('/sendResetPasswordCode', emailController.sendResetPasswordCode)
 
+
+/**
+ * Ruta para restablecer la contraseña en la base de datos
+ * @api {POST} /api/users/resetPassword
+ * @apiName ResetPassword
+ * @apiGroup Users
+ */
+router.post('/resetPassword', userController.resetPassword)
+
 /**
  * Ruta para registrar un nuevo usuario
  * @api {POST} /api/users/register

@@ -61,6 +61,31 @@ async function createUser(firstName, lastName, email, password) {
     return await User.create({ firstName, lastName, email, password }); // Crea un nuevo usuario
 }
 
+/**
+ * Actualiza la contraseña de un usuario en la base de datos.
+ *
+ * Esta función busca un usuario por su dirección de correo electrónico (normalizada a minúsculas
+ * y sin espacios) y actualiza su contraseña por una nueva ya hasheada.
+ *
+ * @async
+ * @function updateUserPassword
+ * @param {string} email - Correo electrónico del usuario al que se desea cambiar la contraseña.
+ * @param {string} hashedPassword - Nueva contraseña hasheada que será almacenada.
+ * @returns {Promise<number[]>} - Retorna un array donde el primer elemento indica cuántas filas fueron actualizadas (por ejemplo: [1] si se modificó un usuario).
+ *
+ * @example
+ * const result = await updateUserPassword('ejemplo@email.com', hashedPassword);
+ * if (result[0] === 0) {
+ *   console.log('No se encontró el usuario o no se actualizó la contraseña.');
+ * }
+ */
+async function updateUserPassword(email, hashedPassword) {
+    return await User.update(
+        { password: hashedPassword },
+        { where: { email: email.trim().toLowerCase() } }
+    );
+}
+
 
 // Exporta:
 // - El modelo User (para usarlo en relaciones o consultas personalizadas).
@@ -69,6 +94,7 @@ module.exports = {
     User,
     findUserByEmail,
     createUser,
+    updateUserPassword
 };
 
 

@@ -130,6 +130,63 @@ async function login(req, res) {
     }
 }
 
+/**
+ * Controlador para restablecer la contraseña de un usuario.
+ *
+ * Este endpoint permite que un usuario cambie su contraseña actual 
+ * proporcionando su email y una nueva contraseña. 
+ * Si el email existe en la base de datos, se actualiza la contraseña
+ * con una versión hasheada utilizando bcrypt.
+ *
+ * @async
+ * @function
+ * @param {Object} req - Objeto de solicitud HTTP.
+ * @param {Object} req.body - Contiene el email del usuario y la nueva contraseña.
+ * @param {string} req.body.email - Email del usuario que solicita el cambio de contraseña.
+ * @param {string} req.body.password - Nueva contraseña en texto plano.
+ * @param {Object} res - Objeto de respuesta HTTP.
+ * @returns {Promise<void>} - Respuesta JSON con mensaje de éxito o error.
+ *
+ * @example
+ * // Petición POST al endpoint correspondiente
+ * POST /api/users/reset-password
+ * Body:
+ * {
+ *   "email": "usuario@example.com",
+ *   "password": "nuevaContraseña123"
+ * }
+ *
+ * Respuesta exitosa:
+ * {
+ *   "message": "Contraseña actualizada correctamente."
+ * }
+ */
+exports.resetPassword = async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email y nueva contraseña son requeridos.' });
+    }
+
+    try {
+        //Se utiliza la funcion creada en userModel que busca el usuario que coincida su email en la base de datos
+        const user = await userModel.findUserByEmail(email.trim().toLowerCase());
+        if (!user) {
+            return res.status(404).json({ message: 'No existe un usuario registrado con ese email.' });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        //Actualiza la contraseña del usuario en la base de datos
+        await userModel.updateUserPassword(email, hashedPassword);
+
+        res.json({ message: 'Contraseña actualizada correctamente.' });
+    } catch (error) {
+        console.error('Error al actualizar contraseña:', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+};
+
+
 // Exportar el controlador para su uso en las rutas
 module.exports = {
     register,

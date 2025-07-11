@@ -48,7 +48,38 @@ exports.sendVerificationCode = async (req, res) => {
     }
 };
 
-// Controlador para enviar el código de verificación para restablecer la contraseña
+/**
+ * Controlador para enviar el código de verificación para restablecer la contraseña.
+ *
+ * Esta función se encarga de enviar un correo electrónico con un código de verificación
+ * al usuario que desea restablecer su contraseña. Utiliza Nodemailer con configuración SMTP
+ * (servicio Gmail en este caso) para realizar el envío.
+ *
+ * @async
+ * @function
+ * @param {Object} req - Objeto de solicitud HTTP.
+ * @param {Object} req.body - Contiene el email del usuario y el código de verificación.
+ * @param {string} req.body.email - Dirección de correo electrónico del destinatario.
+ * @param {string} req.body.code - Código de verificación generado para restablecer contraseña.
+ * @param {Object} res - Objeto de respuesta HTTP.
+ * @returns {Promise<void>} - Devuelve una respuesta JSON con éxito o mensaje de error.
+ *
+ * @throws {400} Si faltan datos obligatorios (`email` o `code`).
+ * @throws {500} Si ocurre un error al enviar el correo electrónico.
+ *
+ * @example
+ * POST /api/auth/send-reset-code
+ * Body:
+ * {
+ *   "email": "usuario@example.com",
+ *   "code": "123456"
+ * }
+ *
+ * Respuesta exitosa:
+ * {
+ *   "message": "Código de restablecimiento enviado"
+ * }
+ */
 exports.sendResetPasswordCode = async (req, res) => {
     // Validar que se reciban los datos necesarios
     const { email, code } = req.body;
