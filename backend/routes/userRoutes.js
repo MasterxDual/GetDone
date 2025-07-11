@@ -52,5 +52,13 @@ router.post("/login", userController.login);
  */
 router.post('/resetPassword', userController.resetPassword);
 
+/**
+ * Ruta para validar los datos del usuario antes de restablecer la contraseña
+ * @api {POST} /api/users/validateUserData
+ * @apiName ValidateUserData
+ * @apiGroup Users
+ */
+router.post('/validateUserData', userController.validateUserData);
+
 // Exporta el router para ser usado en la aplicación principal
 module.exports = router;

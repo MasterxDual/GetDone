@@ -54,11 +54,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // Evento para enviar código al email
     if (sendCodeBtn) {
         sendCodeBtn.addEventListener('click', async () => {
+            const firstName = form.firstName.value.trim();
+            const lastName = form.lastName.value.trim();
             const email = form.email.value.trim().toLowerCase();
-            if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-                mostrarMensaje('Por favor, ingresa un correo electrónico válido.', 'danger');
+
+            //Validación de campos
+            if (!email || !/^\S+@\S+\.\S+$/.test(email) || !firstName || !lastName) {
+                mostrarMensaje('Por favor, completa todos los campos (Nombre completo y email)', 'danger');
                 return;
             }
+
+            // Validar que los nombres coinciden con la base de datos
+            try {
+                const response = await fetch('http://localhost:3000/api/users/validateUserData', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName, email })
+                });
+                const data = await response.json();
+                if (!response.ok || !data.valid) {
+                    mostrarMensaje(data.message || 'Los datos no coinciden con nuestros registros.', 'danger');
+                    return;
+                }
+            } catch (error) {
+                mostrarMensaje('Error al validar los datos. Intenta nuevamente.', 'danger');
+                return;
+            }
+
+            // Generar y enviar código si todo está correcto
             generatedCode = generateCode();
             try {
                 const response = await fetch('http://localhost:3000/api/users/sendResetPasswordCode', {
@@ -102,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Enviar nuevo password
+    // Validar campos de contraseña antes de enviar
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!emailVerified) {

@@ -187,9 +187,58 @@ async function resetPassword(req, res) {
     }
 }
 
+
+/**
+ * Controlador para validar los datos del usuario antes de restablecer la contraseña.
+ * 
+ * Este endpoint recibe el nombre, apellido y email desde el cuerpo de la solicitud,
+ * y verifica si el usuario existe en la base de datos y si los datos coinciden.
+ * 
+ * @async
+ * @function validateUserData
+ * @param {Object} req - Objeto de solicitud HTTP (Express). Espera un `body` con `firstName`, `lastName` y `email`.
+ * @param {Object} res - Objeto de respuesta HTTP (Express).
+ * 
+ * @returns {Object} JSON con la propiedad `valid`:
+ * - `{ valid: true }` si los datos coinciden con los de un usuario existente.
+ * - `{ valid: false, message: string }` si hay error de validación o campos faltantes.
+ * 
+ * @example
+ * // Petición HTTP POST
+ * {
+ *   "firstName": "Agus",
+ *   "lastName": "Pérez",
+ *   "email": "agus@example.com"
+ * }
+ * 
+ * // Posible respuesta
+ * {
+ *   "valid": true
+ * }
+ */
+async function validateUserData(req, res) {
+    const { firstName, lastName, email } = req.body;
+    if (!firstName || !lastName || !email) {
+        return res.status(400).json({ valid: false, message: 'Faltan campos.' });
+    }
+    try {
+        const user = await userModel.findUserByEmail(email.trim().toLowerCase());
+        if (!user) {
+            return res.status(404).json({ valid: false, message: 'Email no registrado.' });
+        }
+        if (user.firstName !== firstName || user.lastName !== lastName) {
+            return res.status(400).json({ valid: false, message: 'Nombre y/o apellido incorrecto.' });
+        }
+        return res.json({ valid: true });
+    } catch (error) {
+        return res.status(500).json({ valid: false, message: 'Error en validación.' });
+    }
+}
+
 // Exportar el controlador para su uso en las rutas
 module.exports = {
     register,
     login,
-    resetPassword
+    resetPassword,
+    validateUserData
 };
