@@ -18,6 +18,15 @@ const emailController = require("../controllers/emailController");
  */
 router.post('/sendVerificationCode', emailController.sendVerificationCode);
 
+
+/**
+ * Ruta para enviar el código para restablecer la contraseña
+ * @api {POST} /api/users/sendResetPasswordCode
+ * @apiName SendResetPasswordCode
+ * @apiGroup Users
+ */
+router.post('/sendResetPasswordCode', emailController.sendResetPasswordCode)
+
 /**
  * Ruta para registrar un nuevo usuario
  * @api {POST} /api/users/register
