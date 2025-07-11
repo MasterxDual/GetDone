@@ -25,23 +25,15 @@ router.post('/sendVerificationCode', emailController.sendVerificationCode);
  * @apiName SendResetPasswordCode
  * @apiGroup Users
  */
-router.post('/sendResetPasswordCode', emailController.sendResetPasswordCode)
+router.post('/sendResetPasswordCode', emailController.sendResetPasswordCode);
 
-
-/**
- * Ruta para restablecer la contraseña en la base de datos
- * @api {POST} /api/users/resetPassword
- * @apiName ResetPassword
- * @apiGroup Users
- */
-router.post('/resetPassword', userController.resetPassword)
 
 /**
  * Ruta para registrar un nuevo usuario
  * @api {POST} /api/users/register
  * @apiName RegisterUser
  * @apiGroup Users
- */
+*/
 router.post("/register", userController.register);
 
 /**
@@ -49,8 +41,16 @@ router.post("/register", userController.register);
  * @api {POST} /api/users/login
  * @apiName LoginUser
  * @apiGroup Users
- */
+*/
 router.post("/login", userController.login);
+
+/**
+ * Ruta para restablecer la contraseña en la base de datos
+ * @api {POST} /api/users/resetPassword
+ * @apiName ResetPassword
+ * @apiGroup Users
+ */
+router.post('/resetPassword', userController.resetPassword);
 
 // Exporta el router para ser usado en la aplicación principal
 module.exports = router;

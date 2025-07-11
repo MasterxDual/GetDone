@@ -161,22 +161,23 @@ async function login(req, res) {
  *   "message": "Contraseña actualizada correctamente."
  * }
  */
-exports.resetPassword = async (req, res) => {
+async function resetPassword(req, res) {
     const { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ message: 'Email y nueva contraseña son requeridos.' });
     }
 
     try {
-        //Se utiliza la funcion creada en userModel que busca el usuario que coincida su email en la base de datos
+        // Busca el usuario por email
         const user = await userModel.findUserByEmail(email.trim().toLowerCase());
         if (!user) {
             return res.status(404).json({ message: 'No existe un usuario registrado con ese email.' });
         }
 
+        // Hashea la nueva contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        //Actualiza la contraseña del usuario en la base de datos
+        // Actualiza la contraseña en la base de datos
         await userModel.updateUserPassword(email, hashedPassword);
 
         res.json({ message: 'Contraseña actualizada correctamente.' });
@@ -184,11 +185,11 @@ exports.resetPassword = async (req, res) => {
         console.error('Error al actualizar contraseña:', error);
         res.status(500).json({ message: 'Error interno del servidor.' });
     }
-};
-
+}
 
 // Exportar el controlador para su uso en las rutas
 module.exports = {
     register,
     login,
+    resetPassword
 };
