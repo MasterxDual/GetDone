@@ -235,10 +235,141 @@ async function validateUserData(req, res) {
     }
 }
 
+
+/**
+ * @function getProfile
+ * @description Controlador para obtener el perfil del usuario autenticado.
+ * Extrae el ID del usuario desde el objeto `req.user` (usualmente proporcionado por middleware de autenticación)
+ * y retorna los datos básicos del perfil (nombre, apellido, email).
+ *
+ * @async
+ * @param {Object} req - Objeto de solicitud HTTP (Express).
+ * @param {Object} req.user - Objeto de usuario inyectado por middleware de autenticación.
+ * @param {number} req.user.id - ID del usuario autenticado.
+ * @param {Object} res - Objeto de respuesta HTTP (Express).
+ *
+ * @returns {Promise<void>} Retorna una respuesta JSON con los datos del perfil o un error correspondiente.
+ *
+ * @throws {404} Si el usuario no existe en la base de datos.
+ * @throws {500} Si ocurre un error inesperado en el servidor (no capturado explícitamente en este fragmento).
+ */
+async function getProfile(req, res) {
+    // Asume que tienes el usuario en la sesión/token autenticado
+    const userId = req.user.id;
+
+    // Buscar usuario en la base de datos
+    const user = await userModel.getUserById(userId);
+
+    // Si no se encuentra el usuario, devolver error 404
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    // Responder con los datos del perfil
+    res.json({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+    });
+}
+
+/**
+ * @function updateProfile
+ * @description Controlador para actualizar el perfil del usuario autenticado. 
+ * Permite modificar el nombre, apellido y, opcionalmente, la contraseña (si se proporciona la actual y la nueva).
+ *
+ * @async
+ * @param {Object} req - Objeto de solicitud HTTP (Express).
+ * @param {Object} req.user - Objeto del usuario autenticado, proporcionado por middleware.
+ * @param {number} req.user.id - ID del usuario autenticado.
+ * @param {Object} req.body - Cuerpo de la solicitud con los datos a actualizar.
+ * @param {string} req.body.firstName - Nuevo nombre del usuario.
+ * @param {string} req.body.lastName - Nuevo apellido del usuario.
+ * @param {string} [req.body.currentPassword] - Contraseña actual (requerida si se quiere cambiar la contraseña).
+ * @param {string} [req.body.newPassword] - Nueva contraseña (requerida si se quiere cambiar la contraseña).
+ *
+ * @param {Object} res - Objeto de respuesta HTTP (Express).
+ * 
+ * @returns {Promise<void>} Retorna una respuesta JSON con un mensaje de éxito o error.
+ *
+ * @throws {400} Si faltan nombre o apellido, o si la contraseña actual es incorrecta.
+ * @throws {404} Si el usuario no se encuentra en la base de datos (implícito si `getUserById` falla silenciosamente).
+ * @throws {500} Si ocurre un error inesperado en el servidor (no manejado explícitamente).
+ */
+/* async function updateProfile(req, res) {
+    const userId = req.user.id;
+    const { firstName, lastName, currentPassword, newPassword } = req.body;
+
+    // Validación básica
+    if (!firstName || !lastName) {
+        return res.status(400).json({ message: 'Nombre y apellido son obligatorios.' });
+    }
+
+    // Actualizar nombre y apellido
+    await userModel.updateNames(userId, firstName, lastName);
+
+    // Cambiar contraseña si corresponde
+    if (currentPassword && newPassword) {
+        const user = await userModel.getUserById(userId);
+
+        //Compara si la clave actual de la sesión es igual a la que tiene en la base de datos
+        const valid = await bcrypt.compare(currentPassword, user.password);
+
+        // Si la contraseña actual no es válida, devolver error 400
+        if (!valid) return res.status(400).json({ message: 'Contraseña actual incorrecta.' });
+
+        // Hashear la nueva contraseña y actualizarla en la base de datos
+        const hash = await bcrypt.hash(newPassword, 10);
+        await userModel.updatePassword(userId, hash);
+    }
+
+    res.json({ message: 'Perfil actualizado correctamente.' });
+}
+ */
+
+
+/**
+ * Actualiza un campo específico del perfil del usuario autenticado.
+ *
+ * @async
+ * @function updateProfileField
+ * @param {Object} req - Objeto de solicitud HTTP Express.
+ * @param {Object} req.user - Objeto de usuario autenticado, inyectado por middleware.
+ * @param {string} req.user.id - ID del usuario autenticado.
+ * @param {Object} req.body - Cuerpo de la solicitud HTTP.
+ * @param {string} req.body.field - Campo del perfil a actualizar (solo 'firstName' o 'lastName' permitidos).
+ * @param {string} req.body.value - Nuevo valor para el campo especificado.
+ * @param {Object} res - Objeto de respuesta HTTP Express.
+ *
+ * @returns {Promise<void>} Retorna una respuesta JSON indicando el éxito o el error de la operación.
+ *
+ * @description
+ * Esta función valida que el campo solicitado para actualizar sea permitido ('firstName' o 'lastName').
+ * Si la validación es exitosa, actualiza dicho campo en la base de datos y responde con un mensaje de éxito.
+ * En caso de error, responde con un mensaje y el código de estado correspondiente.
+ */
+async function updateProfileField(req, res) {
+  const userId = req.user.id;
+  const { field, value } = req.body;
+
+  const allowedFields = ['firstName', 'lastName'];
+  if (!allowedFields.includes(field)) {
+    return res.status(400).json({ message: 'Campo no válido' });
+  }
+
+  try {
+    await userModel.updateField(userId, field, value);
+    res.json({ message: `${field} actualizado correctamente.` });
+  } catch (err) {
+    res.status(500).json({ message: 'Error al actualizar el campo' });
+  }
+}
+
+
 // Exportar el controlador para su uso en las rutas
 module.exports = {
     register,
     login,
     resetPassword,
-    validateUserData
+    validateUserData,
+    getProfile,
+    updateProfileField
 };
