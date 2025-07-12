@@ -61,22 +61,5 @@ router.post('/resetPassword', userController.resetPassword);
 router.post('/validateUserData', userController.validateUserData);
 
 
-/**
- * Ruta para obtener el perfil del usuario
- * @api {GET} /api/users/profile
- * @apiName GetUserProfile
- * @apiGroup Users
- */
-router.get('/profile', userController.getProfile);
-
-
-/**
- * Ruta para actualizar el perfil del usuario
- * @api {PUT} /api/users/updateProfile
- * @apiName UpdateUserProfile
- * @apiGroup Users
- */
-router.put('/updateProfile', userController.updateProfile);
-
 // Exporta el router para ser usado en la aplicación principal
 module.exports = router;
