@@ -235,6 +235,197 @@ async function validateUserData(req, res) {
     }
 }
 
+/**
+ * Actualiza el primer nombre (`firstName`) del usuario autenticado.
+ *
+ * @async
+ * @function updateFirstName
+ * @param {Object} req - Objeto de solicitud (request) de Express.
+ * @param {Object} req.user - Objeto que contiene los datos del usuario autenticado, inyectado por middleware.
+ * @param {string} req.user.id - ID del usuario autenticado.
+ * @param {Object} req.body - Cuerpo de la solicitud que contiene el nuevo `firstName`.
+ * @param {Object} res - Objeto de respuesta (response) de Express.
+ * 
+ * @returns {Object} JSON con el resultado de la operación:
+ * - 200 OK si el nombre fue actualizado correctamente.
+ * - 400 Bad Request si faltan datos requeridos.
+ * - 404 Not Found si el usuario no existe.
+ * - 500 Internal Server Error si ocurrió un error en el servidor.
+ *
+ * @example
+ * PATCH /api/user/firstName
+ * Body: { "firstName": "Juan" }
+ */
+async function updateFirstName(req, res) {
+    try {
+        const userId = req.user?.id; // Debería estar seteado por tu middleware de autenticación
+        const { firstName } = req.body;
+        if (!firstName || !userId) {
+            return res.status(400).json({ success: false, message: 'First name and user ID required.' });
+        }
+
+        const [updated] = await userModel.User.update(
+            { firstName },
+            { where: { id: userId } }
+        );
+
+        if (updated === 0) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+        return res.json({ success: true, message: 'First name updated.' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: 'Error updating first name.' });
+    }
+}
+
+/**
+ * Actualiza el apellido (`lastName`) del usuario autenticado.
+ *
+ * @async
+ * @function updateLastName
+ * @param {Object} req - Objeto de solicitud (request) de Express.
+ * @param {Object} req.user - Objeto que contiene los datos del usuario autenticado, inyectado por middleware.
+ * @param {string} req.user.id - ID del usuario autenticado.
+ * @param {Object} req.body - Cuerpo de la solicitud que contiene el nuevo `lastName`.
+ * @param {Object} res - Objeto de respuesta (response) de Express.
+ * 
+ * @returns {Object} JSON con el resultado de la operación:
+ * - 200 OK si el apellido fue actualizado correctamente.
+ * - 400 Bad Request si faltan datos requeridos.
+ * - 404 Not Found si el usuario no existe.
+ * - 500 Internal Server Error si ocurrió un error en el servidor.
+ *
+ * @example
+ * PATCH /api/user/lastName
+ * Body: { "lastName": "Pérez" }
+ */
+async function updateLastName(req, res) {
+    try {
+        const userId = req.user?.id;
+        const { lastName } = req.body;
+        if (!lastName || !userId) {
+            return res.status(400).json({ success: false, message: 'Last name and user ID required.' });
+        }
+
+        const [updated] = await userModel.User.update(
+            { lastName },
+            { where: { id: userId } }
+        );
+
+        if (updated === 0) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+        return res.json({ success: true, message: 'Last name updated.' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: 'Error updating last name.' });
+    }
+}
+
+/**
+ * Actualiza la contraseña del usuario autenticado.
+ *
+ * @async
+ * @function updatePassword
+ * @param {Object} req - Objeto de solicitud HTTP de Express.
+ * @param {Object} req.user - Información del usuario autenticado, inyectada por el middleware de autenticación.
+ * @param {string} req.user.id - ID del usuario autenticado.
+ * @param {Object} req.body - Cuerpo de la solicitud con las contraseñas.
+ * @param {string} req.body.currentPassword - Contraseña actual del usuario.
+ * @param {string} req.body.newPassword - Nueva contraseña a establecer.
+ * @param {Object} res - Objeto de respuesta HTTP de Express.
+ * @returns {Promise<void>} Devuelve una respuesta JSON con el estado de la operación:
+ * - `200 OK` si la contraseña se actualizó correctamente.
+ * - `400 Bad Request` si faltan campos.
+ * - `401 Unauthorized` si la contraseña actual no es válida.
+ * - `404 Not Found` si el usuario no existe.
+ * - `500 Internal Server Error` en caso de error inesperado.
+ *
+ * @example
+ * // Solicitud PATCH desde el cliente:
+ * fetch('/api/user/password', {
+ *   method: 'PATCH',
+ *   headers: { 'Content-Type': 'application/json' },
+ *   body: JSON.stringify({
+ *     currentPassword: 'abc123',
+ *     newPassword: 'nuevaClaveSegura'
+ *   })
+ * });
+ */
+async function updatePassword(req, res) {
+    try {
+        const userId = req.user?.id;
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: 'Both current and new password required.' });
+        }
+
+        // Obtener usuario de la base de datos
+        const user = await userModel.User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+        // Verificar contraseña actual
+        const isMatch = await require('bcryptjs').compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: 'Current password is incorrect.' });
+        }
+
+        // Hashear la nueva contraseña
+        const hashedPassword = await require('bcryptjs').hash(newPassword, 10);
+
+        // Actualizar la contraseña
+        user.password = hashedPassword;
+        await user.save();
+
+        return res.json({ success: true, message: 'Password updated successfully.' });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: 'Error updating password.' });
+    }
+}
+
+/**
+ * Obtiene el perfil del usuario autenticado.
+ *
+ * Esta función busca el perfil del usuario en la base de datos a partir del ID
+ * extraído del token JWT previamente validado por el middleware de autenticación.
+ * Retorna los datos del usuario (sin incluir la contraseña).
+ *
+ * @async
+ * @function getProfile
+ * @param {Object} req - Objeto de solicitud de Express, que contiene el `user.id` inyectado por el middleware de autenticación.
+ * @param {Object} res - Objeto de respuesta de Express, usado para enviar la respuesta HTTP.
+ * @returns {JSON} Devuelve un objeto JSON con los datos del usuario (`id`, `firstName`, `lastName`, `email`) o un mensaje de error.
+ *
+ * @throws {401} Si el usuario no está autenticado.
+ * @throws {404} Si no se encuentra el usuario en la base de datos.
+ * @throws {500} Si ocurre un error en la base de datos o en el servidor.
+ */
+async function getProfile(req, res) {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        // Busca el usuario
+        const user = await userModel.User.findByPk(userId, {
+            attributes: ['id', 'firstName', 'lastName', 'email'] // No devuelvas password
+        });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json(user);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Could not fetch profile' });
+    }
+}
 
 // Exportar el controlador para su uso en las rutas
 module.exports = {
@@ -242,6 +433,8 @@ module.exports = {
     login,
     resetPassword,
     validateUserData,
-    getProfile,
-    updateProfileField
+    updateFirstName,
+    updateLastName,
+    updatePassword,
+    getProfile
 };
