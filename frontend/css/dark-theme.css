@@ -1,0 +1,134 @@
+/* --- Tema Oscuro --- */
+/* Se reutiliza en todas las pantallas, sino se aplicará a una única página*/
+body.dark-mode {
+  background-color: #181a1b !important;
+  color: #f1f3f4 !important;
+}
+
+/* Cambia fondo de contenedores principales */
+body.dark-mode .container,
+body.dark-mode .main-content,
+body.dark-mode .slidebar {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+}
+
+/* Inputs y botones */
+body.dark-mode .form-control {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+  border-color: #343a40 !important;
+}
+body.dark-mode .form-control:focus {
+  background-color: #23272b !important;
+  color: #fff !important;
+}
+body.dark-mode .btn,
+body.dark-mode .btn-outline-primary,
+body.dark-mode .btn-outline-secondary {
+  border-color: #495057 !important;
+  color: #f1f3f4 !important;
+  background-color: #343a40 !important;
+}
+body.dark-mode .btn-primary {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+body.dark-mode .btn-outline-primary:hover,
+body.dark-mode .btn-outline-secondary:hover {
+  background-color: #1976d2 !important;
+  color: #fff !important;
+}
+
+body.dark-mode .breadcrumb {
+  background-color: #23272b !important;
+}
+
+body.dark-mode .dropdown-menu {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+}
+
+body.dark-mode .alert {
+  background-color: #212529 !important;
+  color: #f1f3f4 !important;
+  border-color: #343a40 !important;
+}
+
+/* Asegura que los títulos tengan suficiente contraste */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode label,
+body.dark-mode .form-label {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* Asegura que la parte derecha de la pantalla se pinte de negro (login, forgot-password y register) */
+body.dark-mode .login-form,
+body.dark-mode .login-right {
+    background-color: #181a1b !important;
+    color: #f1f3f4 !important;
+}
+
+/* Mejora la visibilidad de los placeholders */
+body.dark-mode .form-control::placeholder {
+  color: #cccccc !important;
+  opacity: 1 !important;
+}
+
+/* Mejora el contraste de los links */
+body.dark-mode a {
+  color: #4dabf7 !important;
+}
+
+/* Evita opacidad baja por defecto de Bootstrap */
+body.dark-mode .text-muted {
+  color: #bbbbbb !important;
+  opacity: 1 !important;
+}
+
+/* === Estilos para la landing page en modo oscuro === */
+body.dark-mode .navbar-custom {
+  background-color: #23272b !important;
+  border-bottom: 1px solid #343a40 !important;
+}
+
+body.dark-mode .hero-section,
+body.dark-mode .section-padding,
+body.dark-mode .bg-light,
+body.dark-mode .feature-card,
+body.dark-mode .footer-custom {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+}
+
+body.dark-mode .feature-icon i {
+  color: #f1f3f4 !important;
+}
+
+body.dark-mode .btn-custom-primary {
+  background-color: #1976d2 !important;
+  color: #fff !important;
+  border-color: #1976d2 !important;
+}
+
+body.dark-mode .btn-custom-primary:hover {
+  background-color: #1565c0 !important;
+}
+
+body.dark-mode .section-title,
+body.dark-mode .section-subtitle,
+body.dark-mode .hero-title,
+body.dark-mode .hero-subtitle {
+  color: #f1f3f4 !important;
+}
+
+body.dark-mode a.nav-link,
+body.dark-mode a.nav-link:hover {
+  color: #f1f3f4 !important;
+}
