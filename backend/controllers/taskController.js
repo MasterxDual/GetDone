@@ -10,7 +10,7 @@
 const GroupMember = require('../models/groupMemberModel'); // Modelo de membresías de grupo
 const taskModel = require('../models/taskModel');          // Modelo principal de tareas
 const TaskComment = require('../models/taskCommentModel'); // Modelo de comentarios
-const { Task } = require('../models/associationsModel')
+const { Op } = require('sequelize'); // Operadores de Sequelize para consultas complejas
 
 /**
  * @function newTask
@@ -381,7 +381,7 @@ async function markComplete(req, res) {
 async function searchTasks(req, res) {
     const query = req.query.query || '';
     try {
-        const tasks = await Task.findAll({
+        const tasks = await taskModel.findAll({
             where: {
                 title: {
                     [Op.iLike]: `%${query}%`
