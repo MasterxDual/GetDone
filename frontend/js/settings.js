@@ -222,3 +222,16 @@ function togglePassword(fieldId) {
     const input = document.getElementById(fieldId);
     input.type = (input.type === 'password') ? 'text' : 'password';
 }
+
+/**
+ * @function goToCreateGroup
+ * @description Redirige a la página de creación de grupos
+ * @returns {void}
+ * 
+ * Comportamiento:
+ * - Navega a la página create-group.html
+ * - No requiere parámetros ni retorna valores
+ */
+function goToCreateGroup() {
+    window.location.href = "create-group.html";
+}
