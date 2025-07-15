@@ -132,3 +132,42 @@ body.dark-mode a.nav-link,
 body.dark-mode a.nav-link:hover {
   color: #f1f3f4 !important;
 }
+
+/* Para pintar de negro la tarjeta */
+body.dark-mode .card,
+body.dark-mode .group-card {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+  border-color: #343a40 !important;
+}
+
+body.dark-mode .card .btn,
+body.dark-mode .group-card .btn {
+  background-color: #1976d2 !important;
+  color: #fff !important;
+}
+
+/* Para pintar los desplegables de negro */
+body.dark-mode select,
+body.dark-mode input,
+body.dark-mode textarea {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+  border-color: #343a40 !important;
+}
+
+/* Opciones del select en modo oscuro */
+body.dark-mode select option {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+}
+
+/* Para que los selects no tengan outline azul chillón */
+body.dark-mode select:focus,
+body.dark-mode input:focus,
+body.dark-mode textarea:focus {
+  background-color: #23272b !important;
+  color: #fff !important;
+  border-color: #1976d2 !important;
+  box-shadow: none !important;
+}
