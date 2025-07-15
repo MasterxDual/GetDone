@@ -14,6 +14,7 @@
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="../../css/main.css">
     <link rel="stylesheet" href="../../css/dark-theme.css">
+    <link rel="stylesheet" href="../../css/search-autocomplete.css">
 </head>
 <body>
     <div class="container">
@@ -66,8 +67,10 @@
                 <form class="d-flex align-items-center">
                     <!-- Buscador -->
                     <div class="search-container position-relative">
-                        <input class="form-control pe-5" type="search" placeholder="Search...">
+                        <input class="form-control pe-5" type="search" id="searchBar" placeholder="Search...">
                         <i class="bi bi-search position-absolute end-0 top-50 translate-middle-y me-4"></i>
+                        <!-- Aquí va el dropdown de sugerencias -->
+                        <div id="searchSuggestions" class="search-suggestions"></div>
                     </div>
                     <!-- Notificaciones y Perfil de Usuario -->
                     <a href="#" class="btn btn-notification">
@@ -136,6 +139,7 @@
     <script src="../../js/auth/logout.js"></script>
     <script src="../../js/tasks-list.js"></script>
     <script src="../../js/group-admin.js"></script>
+    <script src="../../js/search-autocomplete.js"></script>
     <script src="../../js/dark-theme.js"></script>
 </body>
 </html>

@@ -356,6 +356,45 @@ async function markComplete(req, res) {
     }
 }
 
+/**
+ * @function searchTasks
+ * @description Controlador para buscar tareas según un término de búsqueda.
+ * @async
+ * @param {Object} req - Objeto de solicitud HTTP (Express).
+ * @param {Object} res - Objeto de respuesta HTTP (Express).
+ * @returns {JSON} Lista de tareas que coincidan con el término buscado.
+ *
+ * @example
+ * // GET /api/tasks/search?query=importante
+ * // Devuelve hasta 10 tareas cuyo nombre contenga "importante" (insensible a mayúsculas).
+ *
+ * @behavior
+ * - Extrae el término de búsqueda desde `req.query.query`.
+ * - Realiza una búsqueda parcial insensible a mayúsculas (`ILIKE`) en el campo `name`.
+ * - Limita los resultados a un máximo de 10 tareas.
+ * - Ordena alfabéticamente las tareas por su nombre.
+ *
+ * @error
+ * - Si ocurre un error en la consulta a la base de datos, responde con status 500 y un mensaje de error.
+ */
+async function searchTasks(req, res) {
+    const query = req.query.query || '';
+    try {
+        const tasks = await taskModel.findAll({
+            where: {
+                name: {
+                    [Op.iLike]: `%${query}%`
+                }
+            },
+            limit: 10,
+            order: [['name', 'ASC']]
+        });
+
+        res.json(tasks);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al buscar tareas' });
+    }
+};
 
 // Exportación de funciones del controlador
 module.exports = {
@@ -366,6 +405,7 @@ module.exports = {
     addComment,
     getComments,
     markComplete,
+    searchTasks
 };
 
 /* Configuración de ruteo recomendada:
