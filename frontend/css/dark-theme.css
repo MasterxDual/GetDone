@@ -208,3 +208,45 @@ body.dark-mode a.nav-link,
 body.dark-mode a.nav-link:hover {
   color: #f1f3f4 !important;
 }
+
+/* Elimina posibles sombras o efectos que interfieran 
+Resolvió el problema del rectangulo hero-section en la pantalla de inicio*/
+body.dark-mode .hero-section {
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+/* Corrige el fondo blanco en inputs autocompletados en modo oscuro 
+Resolvió el problema del autocompletado del input del email en la pantalla de login*/
+body.dark-mode input:-webkit-autofill,
+body.dark-mode input:-webkit-autofill:hover, 
+body.dark-mode input:-webkit-autofill:focus, 
+body.dark-mode input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #23272B inset !important;
+  -webkit-text-fill-color: #f1f3f4 !important;
+  caret-color: #f1f3f4 !important;
+  border-color: #343a40 !important;
+}
+
+/* Estilo para el dropdown de autocompletado en modo oscuro */
+body.dark-mode input::-webkit-contacts-auto-fill-button {
+  background-color: #f1f3f4;
+}
+
+body.dark-mode input::-webkit-credentials-auto-fill-button {
+  background-color: #f1f3f4;
+}
+
+/* Estilos base para los inputs */
+body.dark-mode .form-control {
+  background-color: #23272B !important;
+  color: #f1f3f4 !important;
+  border-color: #343a40 !important;
+}
+
+body.dark-mode .form-control:focus {
+  background-color: #23272B !important;
+  color: #f1f3f4 !important;
+  border-color: #495057 !important;
+  box-shadow: 0 0 0 0.25rem rgba(52, 58, 64, 0.25);
+}
