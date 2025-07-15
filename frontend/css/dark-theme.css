@@ -92,6 +92,82 @@ body.dark-mode .text-muted {
   opacity: 1 !important;
 }
 
+
+
+/* Para pintar de negro la tarjeta */
+body.dark-mode .card,
+body.dark-mode .group-card {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+  border-color: #343a40 !important;
+}
+
+body.dark-mode .card .btn,
+body.dark-mode .group-card .btn {
+  background-color: #1976d2 !important;
+  color: #fff !important;
+}
+
+/* Para pintar los desplegables de negro */
+body.dark-mode select,
+body.dark-mode input,
+body.dark-mode textarea {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+  border-color: #343a40 !important;
+}
+
+/* Opciones del select en modo oscuro */
+body.dark-mode select option {
+  background-color: #23272b !important;
+  color: #f1f3f4 !important;
+}
+
+/* Para que los selects no tengan outline azul chillón */
+body.dark-mode select:focus,
+body.dark-mode input:focus,
+body.dark-mode textarea:focus {
+  background-color: #23272b !important;
+  color: #fff !important;
+  border-color: #1976d2 !important;
+  box-shadow: none !important;
+}
+
+/* Corrige el fondo blanco de los items en modo oscuro */
+body.dark-mode .list-group-item {
+  background-color: #212529 !important;
+  color: #f8f9fa !important;
+  border-color: #343a40 !important;
+}
+
+body.dark-mode .list-group-item:hover {
+  background-color: #2a2e33 !important;
+}
+
+body.dark-mode .badge.bg-primary {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+/* Fondo oscuro para footers de cards en modo oscuro */
+body.dark-mode .card-footer.bg-white {
+  background-color: #212529 !important;
+  color: #f8f9fa !important;
+  border-top: 1px solid #343a40;
+}
+
+/* Estilos para botones claros en modo oscuro */
+body.dark-mode button {
+  background-color: #343a40 !important; /* gris oscuro */
+  color: #f8f9fa !important;            /* texto claro */
+  border: 1px solid #495057 !important; /* borde tenue */
+}
+
+/* Opcional: hover para feedback */
+body.dark-mode button:hover {
+  background-color: #495057 !important;
+}
+
 /* === Estilos para la landing page en modo oscuro === */
 body.dark-mode .navbar-custom {
   background-color: #23272b !important;
@@ -131,43 +207,4 @@ body.dark-mode .hero-subtitle {
 body.dark-mode a.nav-link,
 body.dark-mode a.nav-link:hover {
   color: #f1f3f4 !important;
-}
-
-/* Para pintar de negro la tarjeta */
-body.dark-mode .card,
-body.dark-mode .group-card {
-  background-color: #23272b !important;
-  color: #f1f3f4 !important;
-  border-color: #343a40 !important;
-}
-
-body.dark-mode .card .btn,
-body.dark-mode .group-card .btn {
-  background-color: #1976d2 !important;
-  color: #fff !important;
-}
-
-/* Para pintar los desplegables de negro */
-body.dark-mode select,
-body.dark-mode input,
-body.dark-mode textarea {
-  background-color: #23272b !important;
-  color: #f1f3f4 !important;
-  border-color: #343a40 !important;
-}
-
-/* Opciones del select en modo oscuro */
-body.dark-mode select option {
-  background-color: #23272b !important;
-  color: #f1f3f4 !important;
-}
-
-/* Para que los selects no tengan outline azul chillón */
-body.dark-mode select:focus,
-body.dark-mode input:focus,
-body.dark-mode textarea:focus {
-  background-color: #23272b !important;
-  color: #fff !important;
-  border-color: #1976d2 !important;
-  box-shadow: none !important;
 }
