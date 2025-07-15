@@ -171,13 +171,3 @@ body.dark-mode textarea:focus {
   border-color: #1976d2 !important;
   box-shadow: none !important;
 }
-
-body.dark-mode {
-  background-color: #23272b !important;
-}
-
-body.dark-mode .hero-section {
-  background-color: #23272b !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
