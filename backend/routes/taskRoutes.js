@@ -29,6 +29,14 @@ router.post("/", taskController.newTask);
 router.get("/", taskController.getTasks);
 
 /**
+ * Buscar tareas por nombre o descripción
+ * @api {GET} /api/tasks/search || /api/tasks/search?query=texto
+ * @apiName SearchTasks
+ * @apiGroup Tasks
+ */
+router.get("/search", taskController.searchTasks);
+
+/**
  * Ruta para obtener una tarea por su ID
  * @api {GET} /api/tasks/:id
  * @apiName GetTaskById
@@ -68,13 +76,6 @@ router.patch("/:taskId/complete", taskController.markComplete);
  */
 router.put("/:id", taskController.updateTask);
 
-/**
- * Buscar tareas por nombre o descripción
- * @api {GET} /api/tasks/search || /api/tasks/search?query=texto
- * @apiName SearchTasks
- * @apiGroup Tasks
- */
-router.get("/search", taskController.searchTasks);
 
 /* Futuras implementaciones: */
 // router.put("/:id", taskController.updateTask);
