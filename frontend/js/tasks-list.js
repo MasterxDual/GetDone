@@ -93,7 +93,8 @@ async function loadTasks() {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         // Si falta 1 día o menos, aplicar clase de expiración
-        const expClass = task.status === 'completed' ? 'bg-success' : (diffDays <= 1 && diffDays >= 0 && !task.completed ? 'expiring-soon' : '');
+        // const expClass = task.status === 'completed' ? 'bg-success' : (diffDays <= 1 && diffDays >= 0 && !task.completed ? 'expiring-soon' : '');
+        const expClass = task.status === 'completed' ? 'bg-success' : task.status === 'expiring-soon' ? 'expiring-soon' : '';
 
         // Asignar color de badge según prioridad
         const priorityColors = {

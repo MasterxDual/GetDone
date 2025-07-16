@@ -48,7 +48,7 @@ const Task = sequelize.define('Task', {
     }
   },
     status: {
-      type: DataTypes.ENUM('pending', 'completed'),
+      type: DataTypes.ENUM('pending', 'completed', 'expiring-soon'),
       defaultValue: 'pending'
   },
   // Campo 'delivery_date' para almacenar solo la fecha (sin hora), obligatorio

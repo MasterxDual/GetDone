@@ -153,7 +153,7 @@ async function addComment(req, res) {
 
 /**
  * @function getTasks
- * @description Obtiene tareas con filtros opcionales (grupo o asignado)
+ * @description Obtiene tareas con filtros opcionales (grupo o asignado). Verifica si la tarea está por expirar.
  * @param {Object} req - Request con query params:
  *   - groupId: Filtrar por grupo específico
  *   - assignedTo: Filtrar por usuario asignado
@@ -165,6 +165,7 @@ async function getTasks(req, res) {
     try {
         const { groupId, assignedTo } = req.query;
         const where = {};
+        const today = new Date();
         
         // Construcción dinámica del WHERE clause
         if (groupId) where.groupId = groupId;
@@ -176,6 +177,20 @@ async function getTasks(req, res) {
             // limit: parseInt(req.query.limit) || 20,
             // offset: parseInt(req.query.offset) || 0
         });
+
+        //Actualización de estado de tareas que expiran pronto (1 día o menos)
+        for (const task of tareas) {
+          if (task.status === 'pending') {
+            const dueDate = new Date(task.delivery_date);
+            const diffTime = dueDate.getTime() - today.setHours(0,0,0,0);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays <= 1 && diffDays >= 0) {
+              // Actualiza status y guarda
+              task.status = 'expiring-soon';
+              await task.save();
+            }
+          }
+        }
 
         res.json(tareas);
     } catch (err) {
