@@ -7,6 +7,10 @@ async function loadTasks() {
       const userId = localStorage.getItem('userId');
       const role = localStorage.getItem('selectedGroupRole'); // Obtengo el rol
 
+      // NUEVO: obtener taskId de la URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const taskIdParam = urlParams.get('taskId');
+
       console.log('Rol de usuario:', role);
       console.log('Grupo ID:', groupId);
       console.log('Usuario ID:', userId);
@@ -37,9 +41,21 @@ async function loadTasks() {
         return;
       }
 
-      const tasks = await res.json();
+      let tasks = await res.json();
+
+      // NUEVO: filtrar solo por el taskId si existe en la URL
+      if (taskIdParam) {
+        tasks = tasks.filter(task => String(task.id) === String(taskIdParam));
+      }
+
       const list = document.getElementById('taskList');
       list.innerHTML = '';
+
+      // NUEVO: si no hay tareas, mostrar mensaje
+      if (tasks.length === 0) {
+        list.innerHTML = `<div class="alert alert-info">No se encontró la tarea solicitada.</div>`;
+        return;
+      }
 
       for (const task of tasks) {
         // Obtener comentarios de la tarea

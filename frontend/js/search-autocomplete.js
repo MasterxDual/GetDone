@@ -42,11 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Aquí puedes navegar al grupo/tarea, si tienes esa lógica
                     if (item.type === 'group' && item.id) {
                         window.location.href = `/views/user/home.html?groupId=${item.id}`;
-                    } else if (item.type === 'task' && item.id) {
+                    } else if (item.type === 'task' && item.id && item.groupId) {
                         if (item.role === 'admin') {
-                            window.location.href = `/views/admin/group-admin.html?taskId=${item.id}`;
+                            window.location.href = `/views/admin/group-admin.html?groupId=${item.groupId}&taskId=${item.id}`;
                         } else {
-                            window.location.href = `/views/user/group-member.html?taskId=${item.id}`;
+                            window.location.href = `/views/user/group-member.html?groupId=${item.groupId}&taskId=${item.id}`;
                         }
                     }
                 });
@@ -97,7 +97,8 @@ async function fetchSuggestions(query) {
             ...tasks.map(task => ({
                 type: 'task',
                 name: task.name || task.title,
-                id: task.id || task._id
+                id: task.id || task._id,
+                groupId: task.groupId || task.group._id,
             }))
         ];
 
