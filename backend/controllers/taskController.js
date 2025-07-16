@@ -380,13 +380,22 @@ async function markComplete(req, res) {
  */
 async function searchTasks(req, res) {
     const query = req.query.query || '';
+    const groupId = req.query.groupId; // <-- obtiene el groupId si viene en la URL
+
     try {
+        // Construye el filtro dinámico
+        const where = {
+            title: {
+                [Op.iLike]: `%${query}%` // Búsqueda insensible a mayúsculas
+            }
+        };
+        // Si viene groupId, lo agrega al filtro
+        if (groupId) {
+            where.groupId = groupId;
+        }
+
         const tasks = await taskModel.findAll({
-            where: {
-                title: {
-                    [Op.iLike]: `%${query}%`
-                }
-            },
+            where,
             limit: 10,
             order: [['title', 'ASC']]
         });

@@ -73,6 +73,16 @@ async function fetchSuggestions(query) {
         const token = localStorage.getItem('token') || '';
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
+        // Detecta el groupId en la URL (sirve para cualquier página)
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupId = urlParams.get('groupId');
+
+        // Arma la URL de búsqueda de tareas, solo filtra si existe groupId
+        let tasksUrl = 'http://localhost:3000/api/tasks/search?query=' + encodeURIComponent(query);
+        if (groupId) {
+            tasksUrl += `&groupId=${groupId}`;
+        }
+
         // Fetch grupos y tareas en paralelo
         const [groupsRes, tasksRes] = await Promise.all([
             fetch(`http://localhost:3000/api/groups/search?query=${encodeURIComponent(query)}`, { headers }),
