@@ -87,7 +87,7 @@ async function fetchSuggestions(query) {
         }
 
         // Busca tareas siempre
-        const tasksRes = await fetch(`http://localhost:3000/api/tasks/search?query=${encodeURIComponent(query)}`, { headers });
+        const tasksRes = await fetch(tasksUrl, { headers });
         const tasksData = await tasksRes.json();
         const tasks = Array.isArray(tasksData) ? tasksData : tasksData.tasks || [];
 
@@ -114,34 +114,6 @@ async function fetchSuggestions(query) {
             ];
         }
 
-        // Fetch grupos y tareas en paralelo
-        /* const [groupsRes, tasksRes] = await Promise.all([
-            fetch(`http://localhost:3000/api/groups/search?query=${encodeURIComponent(query)}`, { headers }),
-            fetch(`http://localhost:3000/api/tasks/search?query=${encodeURIComponent(query)}`, { headers })
-        ]); */
-
-        // const groupsData = await groupsRes.json();
-        // const tasksData = await tasksRes.json();
-
-        // Adapta el formato según tu API
-        // const groups = Array.isArray(groupsData) ? groupsData : groupsData.groups || [];
-        // const tasks = Array.isArray(tasksData) ? tasksData : tasksData.tasks || [];
-
-        // Estructura para el render
-        /* const suggestions = [
-            ...groups.map(group => ({
-                type: 'group',
-                name: group.name || group.title,
-                id: group.id || group._id,
-                role: group.role || 'member'
-            })),
-            ...tasks.map(task => ({
-                type: 'task',
-                name: task.name || task.title,
-                id: task.id || task._id,
-                groupId: task.groupId || task.group._id,
-            }))
-        ]; */
 
         // Opcional: prioriza los que empiezan igual
         return suggestions
@@ -150,7 +122,7 @@ async function fetchSuggestions(query) {
                 const bIndex = b.name.toLowerCase().indexOf(query.toLowerCase());
                 return aIndex - bIndex;
             })
-            .slice(0, 8); // máximo 8 sugerencias
+            .slice(0, 15); // máximo 8 sugerencias
     } catch (err) {
         return [];
     }

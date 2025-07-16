@@ -407,51 +407,6 @@ async function markComplete(req, res) {
     }
 } 
 
-/*  Funciona igual que la de arriba
-async function searchTasks(req, res) {
-    const query = req.query.query || '';
-    const userId = req.user.id;
-    const groupId = req.query.groupId;
-
-    try {
-        const where = {
-            title: { [Op.iLike]: `%${query}%` },
-            assignedTo: userId
-        };
-        if (groupId) { // Solo agrega groupId si existe
-            where.groupId = groupId;
-        }
-        
-        const tasks = await taskModel.findAll({
-            where,
-            include: [
-                {
-                    model: Group,
-                    as: 'group',
-                    required: true,
-                    include: [
-                        {
-                            model: User,
-                            as: 'members',
-                            where: { id: userId },
-                            through: { attributes: [] }, // opcional, oculta metadata de la tabla intermedia
-                            required: true
-                        }
-                    ]
-                }
-            ],
-            limit: 10,
-            order: [['title', 'ASC']]
-        });
-
-        res.json(tasks);
-    } catch (err) {
-        console.error('Error en searchTasks:', err);
-        res.status(500).json({ error: 'Error al buscar tareas' });
-    }
-} */
-
-
 // Exportación de funciones del controlador
 module.exports = {
     newTask,
