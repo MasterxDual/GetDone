@@ -74,7 +74,7 @@ router.patch("/:taskId/complete", taskController.markComplete);
  * @apiName UpdateTask
  * @apiGroup Tasks
  */
-router.put("/:id", taskController.updateTask);
+router.put("/:id", authenticateToken, taskController.updateTask);
 
 /**
  * Ruta para eliminar una tarea por su ID

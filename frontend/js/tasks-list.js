@@ -93,7 +93,7 @@ async function loadTasks() {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         // Si falta 1 día o menos, aplicar clase de expiración
-        const expClass = (diffDays <= 1 && diffDays >= 0 && !task.completed) ? 'expiring-soon' : '';
+        const expClass = task.status === 'completed' ? 'bg-success' : (diffDays <= 1 && diffDays >= 0 && !task.completed ? 'expiring-soon' : '');
 
         // Asignar color de badge según prioridad
         const priorityColors = {
@@ -119,11 +119,12 @@ async function loadTasks() {
                 <p class="card-text text-muted mb-2">${task.description}</p>
                 <div class="d-flex align-items-center gap-2">
                   <input type="checkbox" class="form-check-input me-2" id="taskCheckbox-${task.id}" 
-                    ${task.completed ? 'checked' : ''} 
+                    ${task.status === 'completed' ? 'checked' : ''} 
                     onchange="toggleTaskCompletion(${task.id}, this)" 
-                    ${role !== 'admin' && role !== 'member' ? 'disabled' : ''} >
+                    ${role !== 'admin' && role !== 'member' ? 'disabled' : ''} 
+                    style="cursor: pointer;">
                   <span class="status-box ${expClass}" id="taskExpiration-${task.id}">
-                    <i class="bi bi-calendar-event"></i> Exp: ${task.delivery_date}
+                    <i class="bi bi-calendar-event" ></i> Exp: ${task.delivery_date}
                   </span>
                 </div>
               </div>
@@ -183,25 +184,41 @@ async function addComment(event, taskId) {
   }
 }
 
-async function toggleTaskCompletion(taskId, checkbox) {
-  const isCompleted = checkbox.checked; // Obtener el estado del checkbox
+/**
+ * Cambia el estado de completitud de una tarea tanto visualmente como en el backend.
+ *
+ * Si `forceComplete` es `true`, marca la tarea como completada sin importar el estado del checkbox.
+ * Además, modifica visualmente la clase del contenedor de expiración y sincroniza el nuevo estado con la API.
+ *
+ * @async
+ * @function toggleTaskCompletion
+ * @param {number} taskId - ID único de la tarea a actualizar.
+ * @param {HTMLInputElement} checkbox - Elemento checkbox asociado a la tarea.
+ * @param {boolean} [forceComplete=false] - Si se establece en `true`, forzará que la tarea se marque como completada, ignorando el estado del checkbox.
+ * @returns {Promise<void>} No retorna nada directamente, pero actualiza la UI y envía el cambio al servidor.
+ *
+ * @throws {Error} Si ocurre un error en la comunicación con el servidor o en la actualización del estado.
+ *
+ * @sideEffect Modifica el DOM para cambiar estilos visuales y puede recargar las tareas si fue activado por `forceComplete`.
+ */
+async function toggleTaskCompletion(taskId, checkbox, forceComplete = false) {
+  // Si forceComplete es true, siempre marca como completada
+  const isCompleted = forceComplete ? true : checkbox.checked;
   const expirationElement = document.getElementById(`taskExpiration-${taskId}`);
 
   // Cambiar el color del contenedor de la fecha de expiración
   if (isCompleted) {
-    expirationElement.classList.remove('expiring-soon'); // Quita el rojo si está presente
-    expirationElement.classList.add('bg-success'); // Agrega el verde
+    expirationElement.classList.remove('expiring-soon');
+    expirationElement.classList.add('bg-success');
   } else {
-    expirationElement.classList.remove('bg-success'); // Quita el verde
-
+    expirationElement.classList.remove('bg-success');
     // Reaplica el rojo si la tarea está por vencer
     const today = new Date();
-    const dueDate = new Date(expirationElement.textContent.split(': ')[1]); // Extrae la fecha
+    const dueDate = new Date(expirationElement.textContent.split(': ')[1]);
     const diffTime = dueDate.getTime() - today.setHours(0, 0, 0, 0);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
     if (diffDays <= 1 && diffDays >= 0) {
-      expirationElement.classList.add('expiring-soon'); // Vuelve a agregar el rojo
+      expirationElement.classList.add('expiring-soon');
     }
   }
 
@@ -214,7 +231,9 @@ async function toggleTaskCompletion(taskId, checkbox) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ completed: isCompleted }) // Enviar el estado como JSON
+      body: JSON.stringify({ completed: isCompleted,
+        status: isCompleted ? 'completed' : 'pending'
+      })
     });
 
     if (!res.ok) {
@@ -223,11 +242,15 @@ async function toggleTaskCompletion(taskId, checkbox) {
 
     const data = await res.json();
     console.log('Tarea actualizada:', data);
+
+    // Opcional: recargar tareas si fue por el botón de expiración
+    if (forceComplete) loadTasks();
   } catch (error) {
     console.error(error);
     alert('No se pudo actualizar el estado de la tarea.');
   }
 }
+
 
 async function editTask(id) {
   const newDescription = prompt("Nueva descripción de la tarea:"); //Recibe la nueva descripción de la tarea
@@ -271,6 +294,24 @@ async function editTask(id) {
   }
 }
 
+/**
+ * Elimina una tarea del backend tras confirmar la acción con el usuario.
+ *
+ * Realiza una solicitud HTTP DELETE a la API para eliminar la tarea correspondiente
+ * al ID proporcionado. Requiere un token de autenticación guardado en localStorage.
+ * Si la eliminación es exitosa, recarga la lista de tareas en la interfaz.
+ *
+ * @async
+ * @function deleteTask
+ * @param {number|string} id - ID de la tarea a eliminar.
+ * @returns {Promise<void>} No retorna valor. Muestra alertas y actualiza la UI como efecto colateral.
+ *
+ * @throws {Error} Muestra errores en consola y alerta si la solicitud falla o la tarea no se puede eliminar.
+ *
+ * @sideEffect
+ * - Muestra diálogos de confirmación y alerta al usuario.
+ * - Ejecuta `loadTasks()` para actualizar la lista visual tras la eliminación.
+ */
 async function deleteTask(id) {
   if (!confirm('¿Está seguro que desea eliminar esta tarea?')) {
     return;

@@ -219,34 +219,63 @@ async function getTaskById(req, res) {
     }
 }
 
-
+/**
+ * Actualiza el estado de una tarea existente en la base de datos.
+ *
+ * Puede actualizar los campos `completed` y `status`, y ajusta automáticamente
+ * la fecha de finalización (`completedAt`) según corresponda.
+ *
+ * @async
+ * @function updateTask
+ * @param {Object} req - Objeto de solicitud (Express).
+ * @param {Object} req.params - Parámetros de la ruta.
+ * @param {string} req.params.id - ID de la tarea a actualizar.
+ * @param {Object} req.body - Cuerpo de la solicitud con los campos a modificar.
+ * @param {boolean} [req.body.completed] - Estado booleano de finalización de la tarea.
+ * @param {string} [req.body.status] - Estado textual de la tarea ("completed", "pending", etc.).
+ * @param {Object} res - Objeto de respuesta (Express).
+ * @returns {Promise<void>} Respuesta HTTP con el mensaje y los datos de la tarea actualizada,
+ * o mensaje de error si ocurre algún problema.
+ *
+ * @throws {404} Si la tarea con el ID especificado no existe.
+ * @throws {500} Si ocurre un error durante la actualización.
+ */
 async function updateTask(req, res) {
+  const { id } = req.params;
+  const { completed, status } = req.body; // completed es boolean, status es string
+
   try {
-    const { id } = req.params; // ID de la tarea desde los parámetros de la URL
-    const { completed } = req.body; // Campo `completed` desde el cuerpo de la solicitud
-
-    // Validar que el campo `completed` sea booleano
-    if (typeof completed !== 'boolean') {
-      return res.status(400).json({ error: 'El campo "completed" debe ser true o false.' });
-    }
-
-    // Buscar la tarea en la base de datos
     const task = await taskModel.findByPk(id);
-
-    // Si no se encuentra la tarea, devolver un error 404
     if (!task) {
-      return res.status(404).json({ error: 'Tarea no encontrada.' });
+      return res.status(404).json({ message: "Tarea no encontrada" });
     }
 
-    // Actualizar el campo `completed`
-    task.completed = completed;
+    // Si completed está presente, actualiza status y completedAt
+    if (typeof completed !== 'undefined') {
+      task.status = completed ? 'completed' : 'pending';
+      if (completed) {
+        task.completedAt = new Date();
+      } else {
+        task.completedAt = null;
+      }
+    }
+
+    // Si status está presente, actualiza status (por compatibilidad)
+    if (typeof status !== 'undefined') {
+      task.status = status;
+      if (status === 'completed') {
+        task.completedAt = new Date();
+      } else if (status === 'pending') {
+        task.completedAt = null;
+      }
+    }
+
     await task.save();
 
-    // Responder con la tarea actualizada
-    res.json({ mensaje: 'Tarea actualizada correctamente.', task });
+    res.json({ message: "Tarea actualizada correctamente", task });
   } catch (error) {
-    console.error('Error al actualizar la tarea:', error);
-    res.status(500).json({ error: 'Error interno del servidor.' });
+    console.error("Error al actualizar la tarea:", error);
+    res.status(500).json({ message: "Error al actualizar la tarea" });
   }
 }
 
