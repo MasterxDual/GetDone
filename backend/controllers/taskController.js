@@ -380,17 +380,50 @@ async function markComplete(req, res) {
  * @error
  * - Si ocurre un error en la consulta a la base de datos, responde con status 500 y un mensaje de error.
  */
+ async function searchTasks(req, res) {
+    const query = req.query.query || '';
+    const userId = req.user.id;
+    const groupId = req.query.groupId;
+
+    try {
+        const where = {
+            title: { [Op.iLike]: `%${query}%` },
+            assignedTo: userId
+        };
+        if (groupId) { // Solo agrega groupId si existe
+            where.groupId = groupId;
+        }
+
+        const tasks = await taskModel.findAll({
+            where,
+            limit: 10,
+            order: [['title', 'ASC']]
+        });
+
+        res.json(tasks);
+    } catch (err) {
+        console.error('Error en searchTasks:', err);
+        res.status(500).json({ error: 'Error al buscar tareas' });
+    }
+} 
+
+/*  Funciona igual que la de arriba
 async function searchTasks(req, res) {
     const query = req.query.query || '';
     const userId = req.user.id;
     const groupId = req.query.groupId;
 
     try {
+        const where = {
+            title: { [Op.iLike]: `%${query}%` },
+            assignedTo: userId
+        };
+        if (groupId) { // Solo agrega groupId si existe
+            where.groupId = groupId;
+        }
+        
         const tasks = await taskModel.findAll({
-            where: {
-                title: { [Op.iLike]: `%${query}%` },
-                ...(groupId && { groupId })
-            },
+            where,
             include: [
                 {
                     model: Group,
@@ -416,7 +449,7 @@ async function searchTasks(req, res) {
         console.error('Error en searchTasks:', err);
         res.status(500).json({ error: 'Error al buscar tareas' });
     }
-}
+} */
 
 
 // Exportación de funciones del controlador
