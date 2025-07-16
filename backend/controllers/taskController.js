@@ -407,6 +407,52 @@ async function markComplete(req, res) {
     }
 } 
 
+/**
+ * Elimina una tarea existente por su ID.
+ *
+ * Esta función maneja una solicitud HTTP DELETE para eliminar una tarea 
+ * del sistema. El ID de la tarea se obtiene desde los parámetros de la URL.
+ * 
+ * Opcionalmente, se podría agregar validación de permisos del usuario.
+ *
+ * @async
+ * @function deleteTask
+ * @param {Object} req - Objeto de solicitud Express.
+ * @param {Object} req.params - Parámetros de la ruta.
+ * @param {string} req.params.id - ID de la tarea a eliminar.
+ * @param {Object} res - Objeto de respuesta Express.
+ * 
+ * @returns {Promise<void>} Envía una respuesta JSON indicando si la tarea fue eliminada correctamente 
+ * o si ocurrió un error.
+ * 
+ * @example
+ * // DELETE /api/tasks/123
+ * req.params.id = '123';
+ * // Respuesta exitosa:
+ * { message: 'Tarea eliminada correctamente' }
+ *
+ * // Si no se encuentra:
+ * { message: 'Tarea no encontrada' }
+ *
+ * // Si ocurre un error interno:
+ * { message: 'Error al eliminar la tarea' }
+ */
+async function deleteTask(req, res) {
+  try {
+    const { id } = req.params;
+    // Opcional: validar permisos del usuario
+
+    const deleted = await taskModel.destroy({ where: { id } });
+    if (!deleted) {
+      return res.status(404).json({ message: 'Tarea no encontrada' });
+    }
+    res.json({ message: 'Tarea eliminada correctamente' });
+  } catch (err) {
+    console.error('Error eliminando tarea:', err);
+    res.status(500).json({ message: 'Error al eliminar la tarea' });
+  }
+}
+
 // Exportación de funciones del controlador
 module.exports = {
     newTask,
@@ -416,7 +462,8 @@ module.exports = {
     addComment,
     getComments,
     markComplete,
-    searchTasks
+    searchTasks,
+    deleteTask
 };
 
 /* Configuración de ruteo recomendada:

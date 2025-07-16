@@ -76,6 +76,14 @@ router.patch("/:taskId/complete", taskController.markComplete);
  */
 router.put("/:id", taskController.updateTask);
 
+/**
+ * Ruta para eliminar una tarea por su ID
+ * @api {DELETE} /api/tasks/:id
+ * @apiName DeleteTask
+ * @apiGroup Tasks
+ */
+router.delete("/:id", authenticateToken, taskController.deleteTask);
+
 
 /* Futuras implementaciones: */
 // router.put("/:id", taskController.updateTask);
