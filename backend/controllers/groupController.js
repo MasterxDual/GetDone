@@ -397,6 +397,7 @@ async function searchGroups(req, res) {
             },
             include: [{
                 model: User,
+                as: 'members',
                 where: { id: userId }, // Solo incluir grupos donde el usuario es miembro
             }],
             limit: 10, // máximo 10 resultados
