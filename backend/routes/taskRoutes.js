@@ -34,7 +34,7 @@ router.get("/", taskController.getTasks);
  * @apiName SearchTasks
  * @apiGroup Tasks
  */
-router.get("/search", taskController.searchTasks);
+router.get("/search", authenticateToken, taskController.searchTasks);
 
 /**
  * Ruta para obtener una tarea por su ID

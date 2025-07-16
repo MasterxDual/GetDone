@@ -11,6 +11,8 @@ const GroupMember = require('../models/groupMemberModel'); // Modelo de membres�
 const taskModel = require('../models/taskModel');          // Modelo principal de tareas
 const TaskComment = require('../models/taskCommentModel'); // Modelo de comentarios
 const { Op } = require('sequelize'); // Operadores de Sequelize para consultas complejas
+const Group = require('../models/groupModel'); // Modelo de grupos
+const { User } = require('../models/userModel'); // Modelo de usuarios
 
 /**
  * @function newTask
@@ -380,31 +382,42 @@ async function markComplete(req, res) {
  */
 async function searchTasks(req, res) {
     const query = req.query.query || '';
-    const groupId = req.query.groupId; // <-- obtiene el groupId si viene en la URL
+    const userId = req.user.id;
+    const groupId = req.query.groupId;
 
     try {
-        // Construye el filtro dinámico
-        const where = {
-            title: {
-                [Op.iLike]: `%${query}%` // Búsqueda insensible a mayúsculas
-            }
-        };
-        // Si viene groupId, lo agrega al filtro
-        if (groupId) {
-            where.groupId = groupId;
-        }
-
         const tasks = await taskModel.findAll({
-            where,
+            where: {
+                title: { [Op.iLike]: `%${query}%` },
+                ...(groupId && { groupId })
+            },
+            include: [
+                {
+                    model: Group,
+                    as: 'group',
+                    required: true,
+                    include: [
+                        {
+                            model: User,
+                            as: 'members',
+                            where: { id: userId },
+                            through: { attributes: [] }, // opcional, oculta metadata de la tabla intermedia
+                            required: true
+                        }
+                    ]
+                }
+            ],
             limit: 10,
             order: [['title', 'ASC']]
         });
 
         res.json(tasks);
     } catch (err) {
+        console.error('Error en searchTasks:', err);
         res.status(500).json({ error: 'Error al buscar tareas' });
     }
-};
+}
+
 
 // Exportación de funciones del controlador
 module.exports = {
