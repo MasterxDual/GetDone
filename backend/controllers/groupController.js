@@ -386,6 +386,8 @@ async function getGroupMembers(req, res) {
  */
 async function searchGroups(req, res) {
     const query = req.query.query || '';
+    const userId = req.user.id; // Debes tener auth middleware que setee req.user
+
     try {
         const groups = await Group.findAll({
             where: {
@@ -393,6 +395,10 @@ async function searchGroups(req, res) {
                     [Op.iLike]: `%${query}%` // Búsqueda insensible a mayúsculas
                 }
             },
+            include: [{
+                model: User,
+                where: { id: userId }, // Solo incluir grupos donde el usuario es miembro
+            }],
             limit: 10, // máximo 10 resultados
             order: [['name', 'ASC']]
         });

@@ -57,7 +57,7 @@ router.post('/accept', groupController.acceptInvitation);
  * @apiParam {String} query Texto a buscar en nombre o descripción de grupos
  * @apiSuccess {Array} groups Lista de grupos que coinciden con la búsqueda
  */
-router.get('/search', groupController.searchGroups);
+router.get('/search', authenticateToken, groupController.searchGroups);
 
 /**
  * Obtener los detalles de un grupo por su ID
