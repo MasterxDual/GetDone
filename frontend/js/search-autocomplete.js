@@ -76,6 +76,9 @@ async function fetchSuggestions(query) {
         // Detecta el groupId en la URL (sirve para cualquier página)
         const urlParams = new URLSearchParams(window.location.search);
         const groupId = urlParams.get('groupId');
+        const pathname = window.location.pathname;
+
+        const isGroupPage = pathname.includes('group-admin.html') || pathname.includes('group-member.html');
 
         // Arma la URL de búsqueda de tareas, solo filtra si existe groupId
         let tasksUrl = 'http://localhost:3000/api/tasks/search?query=' + encodeURIComponent(query);
@@ -83,21 +86,49 @@ async function fetchSuggestions(query) {
             tasksUrl += `&groupId=${groupId}`;
         }
 
-        // Fetch grupos y tareas en paralelo
-        const [groupsRes, tasksRes] = await Promise.all([
-            fetch(`http://localhost:3000/api/groups/search?query=${encodeURIComponent(query)}`, { headers }),
-            fetch(`http://localhost:3000/api/tasks/search?query=${encodeURIComponent(query)}`, { headers })
-        ]);
-
-        const groupsData = await groupsRes.json();
+        // Busca tareas siempre
+        const tasksRes = await fetch(`http://localhost:3000/api/tasks/search?query=${encodeURIComponent(query)}`, { headers });
         const tasksData = await tasksRes.json();
-
-        // Adapta el formato según tu API
-        const groups = Array.isArray(groupsData) ? groupsData : groupsData.groups || [];
         const tasks = Array.isArray(tasksData) ? tasksData : tasksData.tasks || [];
 
+        let suggestions = tasks.map(task => ({
+            type: 'task',
+            name: task.name || task.title,
+            id: task.id || task._id,
+            groupId: task.groupId || (task.group && task.group._id),
+        }));
+
+        // Si NO estás en página de grupo, también busca grupos
+        if (!isGroupPage) {
+            const groupsRes = await fetch(`http://localhost:3000/api/groups/search?query=${encodeURIComponent(query)}`, { headers });
+            const groupsData = await groupsRes.json();
+            const groups = Array.isArray(groupsData) ? groupsData : groupsData.groups || [];
+            suggestions = [
+                ...groups.map(group => ({
+                    type: 'group',
+                    name: group.name || group.title,
+                    id: group.id || group._id,
+                    role: group.role || 'member'
+                })),
+                ...suggestions
+            ];
+        }
+
+        // Fetch grupos y tareas en paralelo
+        /* const [groupsRes, tasksRes] = await Promise.all([
+            fetch(`http://localhost:3000/api/groups/search?query=${encodeURIComponent(query)}`, { headers }),
+            fetch(`http://localhost:3000/api/tasks/search?query=${encodeURIComponent(query)}`, { headers })
+        ]); */
+
+        // const groupsData = await groupsRes.json();
+        // const tasksData = await tasksRes.json();
+
+        // Adapta el formato según tu API
+        // const groups = Array.isArray(groupsData) ? groupsData : groupsData.groups || [];
+        // const tasks = Array.isArray(tasksData) ? tasksData : tasksData.tasks || [];
+
         // Estructura para el render
-        const suggestions = [
+        /* const suggestions = [
             ...groups.map(group => ({
                 type: 'group',
                 name: group.name || group.title,
@@ -110,7 +141,7 @@ async function fetchSuggestions(query) {
                 id: task.id || task._id,
                 groupId: task.groupId || task.group._id,
             }))
-        ];
+        ]; */
 
         // Opcional: prioriza los que empiezan igual
         return suggestions
