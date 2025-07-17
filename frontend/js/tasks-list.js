@@ -75,7 +75,7 @@ async function loadTasks() {
         // Construir HTML de comentarios
         let commentsHtml = '<div class="comments-section"><h6>Comentarios:</h6>';
         for (const comment of comments) {
-          commentsHtml += `<p><strong>Usuario ${comment.userId}:</strong> ${comment.comment}</p>`;
+          commentsHtml += `<p><strong>${comment.userName}:</strong> ${comment.comment}</p>`;
         }
         commentsHtml += `
           <form onsubmit="addComment(event, ${task.id})">

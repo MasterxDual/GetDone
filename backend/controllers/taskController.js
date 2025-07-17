@@ -7,7 +7,7 @@
 // - Validación de permisos
 
 // Importación de modelos requeridos
-const GroupMember = require('../models/groupMemberModel'); // Modelo de membresías de grupo
+const {GroupMember} = require('../models/groupMemberModel'); // Modelo de membresías de grupo
 const taskModel = require('../models/taskModel');          // Modelo principal de tareas
 const TaskComment = require('../models/taskCommentModel'); // Modelo de comentarios
 const { Op } = require('sequelize'); // Operadores de Sequelize para consultas complejas
@@ -315,12 +315,25 @@ async function getComments(req, res) {
 
         const comments = await TaskComment.findAll({
             where: { taskId },
+            include: [{
+                model: User,
+                as: 'author',
+                attributes: ['id', 'firstName', 'lastName'] // Información del usuario autor
+            }],
             order: [['createdAt', 'ASC']], // Orden ascendente por fecha
             // Podría incluirse información del usuario:
             // include: [{ model: User, attributes: ['id', 'name'] }]
         });
 
-        res.json(comments);
+        // Opcional: mapear para facilitar el frontend
+        const commentsWithUser = comments.map(comment => ({
+          id: comment.id,
+          comment: comment.comment,
+          userId: comment.userId,  
+          userName: comment.author ? `${comment.author.firstName} ${comment.author.lastName}` : `Usuario ${comment.userId}`
+        }));
+
+        res.json(commentsWithUser);
     } catch (error) {
         console.error('Error en getComments:', error);
         res.status(500).json({ 
