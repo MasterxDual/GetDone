@@ -69,12 +69,12 @@ router.get("/:taskId/comments", taskController.getComments);
 router.patch("/:taskId/complete", taskController.markComplete);
 
 /**
- * Ruta para actualizar una tarea por su ID
- * @api {PUT} /api/tasks/:id
+ * Ruta para actualizar el estado de una tarea por su ID
+ * @api {PUT} /api/tasks/:id/status
  * @apiName UpdateTask
  * @apiGroup Tasks
  */
-router.put("/:id", authenticateToken, taskController.updateTask);
+router.put("/:id/status", authenticateToken, taskController.updateTask);
 
 /**
  * Ruta para eliminar una tarea por su ID
@@ -84,10 +84,14 @@ router.put("/:id", authenticateToken, taskController.updateTask);
  */
 router.delete("/:id", authenticateToken, taskController.deleteTask);
 
+/**
+ * Ruta para editar una tarea por su ID
+ * @api {PUT} /api/tasks/:id/edit
+ * @apiName EditTask
+ * @apiGroup Tasks
+ */
+router.put("/:id/edit", authenticateToken, taskController.editTask);
 
-/* Futuras implementaciones: */
-// router.put("/:id", taskController.updateTask);
-// router.delete("/:id", taskController.deleteTask);
 
 // Exporta el enrutador para ser utilizado en la aplicación
 module.exports = router; // Exporta el enrutador para ser utilizado en la aplicación

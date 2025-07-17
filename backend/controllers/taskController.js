@@ -365,6 +365,59 @@ async function getComments(req, res) {
 }
 
 /**
+ * Edita una tarea existente, actualizando su descripción y/o fecha de entrega.
+ *
+ * Solo los usuarios con rol de **admin** dentro del grupo asociado a la tarea pueden modificarla.
+ * Requiere autenticación mediante JWT y debe usarse en conjunto con `authenticateToken`.
+ *
+ * @async
+ * @function editTask
+ * @param {import('express').Request} req - Objeto de solicitud HTTP. Contiene:
+ *   - `params.id`: ID de la tarea a editar.
+ *   - `body.description`: Nueva descripción (opcional).
+ *   - `body.delivery_date`: Nueva fecha de entrega en formato `YYYY-MM-DD` (opcional).
+ *   - `user.id`: ID del usuario autenticado (desde JWT).
+ * @param {import('express').Response} res - Objeto de respuesta HTTP. Devuelve la tarea actualizada o un mensaje de error.
+ *
+ * @returns {Promise<void>} No retorna directamente, pero responde con:
+ *   - `200 OK` y la tarea actualizada si fue exitosa.
+ *   - `403 Forbidden` si el usuario no es admin del grupo.
+ *   - `404 Not Found` si la tarea no existe.
+ *
+ * @throws {Error} Si ocurre un error inesperado, responde con un error genérico del servidor.
+ *
+ * @example
+ * PUT /api/tasks/12
+ * {
+ *   "description": "Actualizar el informe final",
+ *   "delivery_date": "2025-08-01"
+ * }
+ */
+async function editTask(req, res) {
+  const { id } = req.params;
+  const { description, delivery_date } = req.body;
+  const userId = req.user.id; // del JWT/session
+
+  const task = await taskModel.findByPk(id);
+  if (!task) return res.status(404).json({ message: 'Tarea no encontrada' });
+
+  const membership = await GroupMember.findOne({
+    where: { userId, groupId: task.groupId }
+  });
+
+  if (!membership || membership.role !== 'admin') {
+    return res.status(403).json({ message: 'Solo el admin puede editar esta tarea.' });
+  }
+
+  task.description = description || task.description;
+  task.delivery_date = delivery_date || task.delivery_date;
+
+  await task.save();
+
+  res.json(task);
+}
+
+/**
  * @function markComplete
  * @description Marca una tarea como completada con validación de permisos
  * @param {Object} req - Request con:
@@ -541,7 +594,8 @@ module.exports = {
     getComments,
     markComplete,
     searchTasks,
-    deleteTask
+    deleteTask,
+    editTask
 };
 
 /* Configuración de ruteo recomendada:

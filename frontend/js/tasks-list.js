@@ -1,5 +1,33 @@
 requireAuth();
 
+
+document.getElementById('editTaskForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const taskId = document.getElementById('editTaskId').value;
+  const description = document.getElementById('editTaskDescription').value;
+  const delivery_date = document.getElementById('editTaskDate').value;
+
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/tasks/${taskId}/edit`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ description, delivery_date })
+    });
+    if (res.ok) {
+      // Puedes recargar la vista o actualizar dinámicamente
+      location.reload(); // O tu lógica de render
+    } else {
+      alert('Solo el admin puede editar la tarea.');
+    }
+  } catch (err) {
+    alert('Error al editar la tarea.');
+  }
+});
+
+
 async function loadTasks() {
     try {
       const token = localStorage.getItem('token');
@@ -93,7 +121,6 @@ async function loadTasks() {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         // Si falta 1 día o menos, aplicar clase de expiración
-        // const expClass = task.status === 'completed' ? 'bg-success' : (diffDays <= 1 && diffDays >= 0 && !task.completed ? 'expiring-soon' : '');
         const expClass = task.status === 'completed' ? 'bg-success' : task.status === 'expiring-soon' ? 'expiring-soon' : '';
 
         // Asignar color de badge según prioridad
@@ -131,16 +158,16 @@ async function loadTasks() {
               </div>
               <div class="ms-3">
                 <div class="dropdown">
-                  <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton${task.id}"
+                  ${role === 'admin' ? `
+                    <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton${task.id}"
                     data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-three-dots-vertical"></i>
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${task.id}">
-                    ${role === 'admin' ? `
-                    <li><a class="dropdown-item" href="#" onclick="editTask(${task.id})">Editar</a></li>
-                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask(${task.id})">Eliminar</a></li>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton${task.id}">
+                      <li><a class="dropdown-item" href="#" onclick="openEditTaskModal(${task.id}, '${task.description.replace(/'/g, "\\'")}', '${task.delivery_date}')">Editar</a></li>
+                      <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask(${task.id})">Eliminar</a></li>
+                    </ul>
                     ` : ''}
-                  </ul>
                 </div>
               </div>
             </div>
@@ -155,6 +182,8 @@ async function loadTasks() {
       console.error('Error cargando tareas:', error);
     }
 }
+
+/* editTask(${task.id}) */
 
 async function addComment(event, taskId) {
   event.preventDefault();
@@ -226,7 +255,7 @@ async function toggleTaskCompletion(taskId, checkbox, forceComplete = false) {
   // Enviar la actualización al backend
   try {
     const token = localStorage.getItem('token');
-    const res = await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+    const res = await fetch(`http://localhost:3000/api/tasks/${taskId}/status`, {
       method: 'PUT',
       headers: { 
         'Content-Type': 'application/json',
@@ -252,47 +281,28 @@ async function toggleTaskCompletion(taskId, checkbox, forceComplete = false) {
   }
 }
 
-
-async function editTask(id) {
-  const newDescription = prompt("Nueva descripción de la tarea:"); //Recibe la nueva descripción de la tarea
+/**
+ * Abre un modal para editar una tarea, precargando sus datos actuales.
+ *
+ * Esta función configura los campos del formulario de edición con los valores
+ * actuales de la tarea seleccionada (ID, descripción y fecha de entrega) y
+ * luego muestra el modal utilizando Bootstrap.
+ *
+ * @function openEditTaskModal
+ * @param {number|string} taskId - ID único de la tarea a editar.
+ * @param {string} description - Descripción actual de la tarea.
+ * @param {string} delivery_date - Fecha de entrega de la tarea en formato 'YYYY-MM-DD'.
+ *
+ * @example
+ * openEditTaskModal(5, "Actualizar documentación", "2025-07-20");
+ */
+function openEditTaskModal(taskId, description, delivery_date) {
+  document.getElementById('editTaskId').value = taskId;
+  document.getElementById('editTaskDescription').value = description;
+  document.getElementById('editTaskDate').value = delivery_date;
+  var modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
   
-  if (!newDescription) return;
-  
-  const newDate = prompt("Nueva fecha de vencimiento (YYYY-MM-DD):"); //Recibe la nueva fecha de vencimiento
-  
-  //Valida que la fecha tenga el formato correcto
-  if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
-    alert("Fecha inválida. Debe tener el formato YYYY-MM-DD.");
-    return;
-  }
-  
-  try {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`http://localhost:3000/api/tasks/${id}`, { // Se utiliza para que el frontend se comunique con el backend o con cualquier API.
-      method: 'PUT', // Método HTTP para actualizar
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }, // Indica que el cuerpo de la petición es JSON
-      body: JSON.stringify({ // Se encarga de enviar datos al servidor en formato JSON.
-        description: newDescription,
-        delivery_date: newDate
-      })
-    });
-  
-    const data = await res.json(); //Espera a que el servidor responda y convierte ese JSON en un objeto usable en JavaScript
-  
-    if (res.ok) {
-      alert(data.mensaje); // Muestra en pantalla el mensaje que devolvió el backend ("Tarea actualizada correctamente")
-      loadTasks(); // Refrescar la lista dinámicamente
-    } else {
-      alert("Error: " + data.error);
-    }
-  
-  } catch (error) {
-    console.error(error);
-    alert("Error al actualizar la tarea.");
-  }
+  modal.show();
 }
 
 /**

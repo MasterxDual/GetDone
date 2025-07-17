@@ -131,6 +131,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para editar tarea -->
+    <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Formulario para editar una tarea -->
+          <form id="editTaskForm">
+
+            <!-- Encabezado del modal -->
+            <div class="modal-header">
+              <h5 class="modal-title" id="editTaskModalLabel">Editar Tarea</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Cuerpo del modal con campos editables -->
+            <div class="modal-body">
+                <!-- Campo oculto para guardar el ID de la tarea -->
+              <input type="hidden" id="editTaskId" name="taskId">
+
+              <!-- Campo de descripción -->
+              <div class="mb-3">
+                <label for="editTaskDescription" class="form-label">Descripción</label>
+                <textarea class="form-control" id="editTaskDescription" name="description" required></textarea>
+              </div>
+
+              <!-- Campo de fecha de expiración -->
+              <div class="mb-3">
+                <label for="editTaskDate" class="form-label">Fecha de Expiración</label>
+                <input type="date" class="form-control" id="editTaskDate" name="delivery_date" required>
+              </div>
+            </div>
+
+            <!-- Pie del modal con botones de acción -->
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
+            
+          </form>
+        </div>
+      </div>
+    </div>
     
     <!-- Bootstrap's JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
