@@ -1,32 +1,35 @@
-requireAuth();
+document.addEventListener('DOMContentLoaded', function() {
+  requireAuth();
+  const editForm = document.getElementById('editTaskForm')
 
+  if(editForm) {
+    editForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const taskId = document.getElementById('editTaskId').value;
+      const description = document.getElementById('editTaskDescription').value;
+      const delivery_date = document.getElementById('editTaskDate').value;
 
-document.getElementById('editTaskForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const taskId = document.getElementById('editTaskId').value;
-  const description = document.getElementById('editTaskDescription').value;
-  const delivery_date = document.getElementById('editTaskDate').value;
-
-  try {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`http://localhost:3000/api/tasks/${taskId}/edit`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({ description, delivery_date })
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`http://localhost:3000/api/tasks/${taskId}/edit`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ description, delivery_date })
+        });
+        if (res.ok) {
+          // Puedes recargar la vista o actualizar dinámicamente
+          location.reload(); // O tu lógica de render
+        } else {
+          alert('Solo el admin puede editar la tarea.');
+        }
+      } catch (err) {
+        alert('Error al editar la tarea.');
+      }
     });
-    if (res.ok) {
-      // Puedes recargar la vista o actualizar dinámicamente
-      location.reload(); // O tu lógica de render
-    } else {
-      alert('Solo el admin puede editar la tarea.');
-    }
-  } catch (err) {
-    alert('Error al editar la tarea.');
   }
 });
-
 
 async function loadTasks() {
     try {
@@ -301,7 +304,7 @@ function openEditTaskModal(taskId, description, delivery_date) {
   document.getElementById('editTaskDescription').value = description;
   document.getElementById('editTaskDate').value = delivery_date;
   var modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
-  
+
   modal.show();
 }
 
