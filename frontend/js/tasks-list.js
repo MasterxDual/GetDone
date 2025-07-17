@@ -31,6 +31,29 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+/**
+ * Carga y renderiza la lista de tareas del grupo seleccionado desde el backend.
+ *
+ * Esta función realiza las siguientes acciones:
+ * - Obtiene el `groupId`, `userId`, `role` y `token` desde el almacenamiento local.
+ * - Si hay un `taskId` en la URL, filtra los resultados para mostrar solo esa tarea.
+ * - Construye la URL de la API en función del rol del usuario.
+ * - Hace una solicitud `GET` a `/api/tasks`.
+ * - Por cada tarea recibida:
+ *    - Recupera los comentarios asociados.
+ *    - Calcula el estado de expiración según la fecha de entrega.
+ *    - Aplica estilos condicionales según prioridad, estado y rol.
+ *    - Construye y agrega el HTML al DOM.
+ *
+ * También incluye lógica para:
+ * - Mostrar mensaje si no se encuentra ninguna tarea.
+ * - Mostrar el rol del usuario junto al comentario.
+ * - Permitir a administradores editar o eliminar tareas.
+ *
+ * @async
+ * @function
+ * @returns {Promise<void>} No devuelve un valor, pero modifica el DOM con el contenido de tareas.
+ */
 async function loadTasks() {
     try {
       const token = localStorage.getItem('token');
@@ -186,8 +209,23 @@ async function loadTasks() {
     }
 }
 
-/* editTask(${task.id}) */
-
+/**
+ * Envía un nuevo comentario asociado a una tarea específica al servidor.
+ *
+ * Esta función se ejecuta al enviar el formulario de comentario.
+ * Realiza las siguientes acciones:
+ * - Previene el comportamiento por defecto del formulario.
+ * - Recupera el contenido del comentario y el token JWT desde localStorage.
+ * - Realiza una solicitud POST a `/api/tasks/:taskId/comments` con el comentario.
+ * - Si la solicitud es exitosa, limpia el formulario y recarga las tareas para reflejar el nuevo comentario.
+ * - En caso de error, muestra un mensaje de alerta con la causa del fallo.
+ *
+ * @async
+ * @function
+ * @param {Event} event - El evento de envío del formulario.
+ * @param {number} taskId - El ID de la tarea a la que se asocia el comentario.
+ * @returns {Promise<void>} No retorna valor, pero actualiza el estado de la UI.
+ */
 async function addComment(event, taskId) {
   event.preventDefault();
   const form = event.target;
