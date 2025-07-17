@@ -25,6 +25,10 @@ const sequelize = require('./config/sequelize');
 // Esto debe hacerse después de importar sequelize pero antes de sync()
 require('./models/associationsModel');
 
+//Esto inicia el servicio de cron para ejecutar diariamente y avisar al usuario que 
+//la tarea que tiene está por vencerse (1 día o menos de vencimiento)
+require('./jobs/taskNotifications')
+
 // Crear una instancia de la aplicación Express
 const app = express();
 

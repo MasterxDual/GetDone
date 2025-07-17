@@ -13,6 +13,7 @@ const TaskComment = require('../models/taskCommentModel'); // Modelo de comentar
 const { Op } = require('sequelize'); // Operadores de Sequelize para consultas complejas
 const Group = require('../models/groupModel'); // Modelo de grupos
 const { User } = require('../models/userModel'); // Modelo de usuarios
+const { sendAssignmentEmail } = require('./emailController');
 
 /**
  * @function newTask
@@ -68,6 +69,13 @@ async function newTask(req, res) {
           createdAt: new Date(),         // Timestamps manuales
           updatedAt: new Date()
         });
+
+        /* Envía el email al usuario al cual fue asignada la tarea */
+        const assignedUser = await User.findByPk(assignedTo);
+
+        if(assignedUser && assignedUser.email) {
+            await sendAssignmentEmail(assignedUser.email, tarea)
+        }
 
         res.status(201).json({ 
             message: 'Tarea creada', 
