@@ -7,7 +7,7 @@
 // - Validación de permisos
 
 // Importación de modelos requeridos
-const {GroupMember} = require('../models/groupMemberModel'); // Modelo de membresías de grupo
+const GroupMember = require('../models/groupMemberModel'); // Modelo de membresías de grupo
 const taskModel = require('../models/taskModel');          // Modelo principal de tareas
 const TaskComment = require('../models/taskCommentModel'); // Modelo de comentarios
 const { Op } = require('sequelize'); // Operadores de Sequelize para consultas complejas
@@ -294,53 +294,74 @@ async function updateTask(req, res) {
   }
 }
 
-// // Ruta PUT para modificar solo la descripción y fecha de entrega de una tarea
-// router.put('/:id', async (req, res) => {
-//   try {
-//     const { id } = req.params; //Trae los parametros de la URL
-//     const { description, delivery_date } = req.body; //Trae el body de la peticion
 
 /**
+ * Obtiene los comentarios asociados a una tarea específica, incluyendo el nombre completo del autor
+ * y su rol dentro del grupo al que pertenece la tarea.
+ *
+ * @async
  * @function getComments
- * @description Obtiene todos los comentarios de una tarea ordenados cronológicamente
- * @param {Object} req - Request con:
- *   - params: { taskId }
- * @param {Object} res - Response
- * @returns {Object} JSON con array de comentarios
- * @throws {500} Error interno
+ * @param {import('express').Request} req - Objeto de solicitud HTTP de Express, que debe incluir `taskId` en los parámetros de ruta.
+ * @param {import('express').Response} res - Objeto de respuesta HTTP de Express, usado para devolver el resultado en formato JSON.
+ * 
+ * @returns {Promise<void>} Devuelve una respuesta JSON con un arreglo de comentarios enriquecidos con nombre de usuario y rol.
+ *
+ * @throws {404} Si la tarea con el `taskId` proporcionado no existe.
+ * @throws {500} Si ocurre un error durante la consulta a la base de datos.
+ * 
+ * @example
+ * // Respuesta esperada:
+ * [
+ *   {
+ *     id: 1,
+ *     comment: "Esta es una nota",
+ *     userId: 3,
+ *     userName: "Juan Pérez",
+ *     role: "admin"
+ *   }
+ * ]
  */
 async function getComments(req, res) {
-    try {
-        const { taskId } = req.params;
+  const { taskId } = req.params;
+  
+  // 1. Buscar la tarea para obtener el groupId
+  const task = await taskModel.findByPk(taskId);
+  if (!task) return res.status(404).json({ message: 'Tarea no encontrada' });
+  const groupId = task.groupId;
 
-        const comments = await TaskComment.findAll({
-            where: { taskId },
-            include: [{
-                model: User,
-                as: 'author',
-                attributes: ['id', 'firstName', 'lastName'] // Información del usuario autor
-            }],
-            order: [['createdAt', 'ASC']], // Orden ascendente por fecha
-            // Podría incluirse información del usuario:
-            // include: [{ model: User, attributes: ['id', 'name'] }]
-        });
+  // 2. Buscar comentarios e incluir el usuario y el GroupMember con ese groupId
+  const comments = await TaskComment.findAll({
+    where: { taskId },
+    include: [
+      {
+        model: User,
+        as: 'author',
+        attributes: ['id', 'firstName', 'lastName'],
+        include: [{
+          model: GroupMember,
+          as: 'groupMemberships',
+          attributes: ['role'],
+          where: { groupId } // Solo el rol en ese grupo
+        }]
+      }
+    ],
+    order: [['createdAt', 'ASC']]
+  });
 
-        // Opcional: mapear para facilitar el frontend
-        const commentsWithUser = comments.map(comment => ({
-          id: comment.id,
-          comment: comment.comment,
-          userId: comment.userId,  
-          userName: comment.author ? `${comment.author.firstName} ${comment.author.lastName}` : `Usuario ${comment.userId}`
-        }));
+  // 3. Construir el array de comentarios con nombre y rol
+  const commentsWithUser = comments.map(comment => ({
+    id: comment.id,
+    comment: comment.comment,
+    userId: comment.userId,
+    userName: comment.author
+      ? `${comment.author.firstName} ${comment.author.lastName}`
+      : `Usuario ${comment.userId}`,
+    role: comment.author && comment.author.groupMemberships.length > 0
+      ? comment.author.groupMemberships[0].role
+      : 'Sin rol'
+  }));
 
-        res.json(commentsWithUser);
-    } catch (error) {
-        console.error('Error en getComments:', error);
-        res.status(500).json({ 
-            message: 'Error al obtener comentarios',
-            systemError: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
+  res.json(commentsWithUser);
 }
 
 /**
