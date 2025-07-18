@@ -73,9 +73,13 @@
                         <div id="searchSuggestions" class="search-suggestions"></div>
                     </div>
                     <!-- Notificaciones y Perfil de Usuario -->
-                    <a href="#" class="btn btn-notification">
-                        <i class="bi bi-bell"></i>
+                    <a href="#" class="btn btn-notification" id="notificationBell" onclick="showNotificationsDropdown(event)">
+                      <i class="bi bi-bell"></i>
+                      <span id="notificationBadge" class="badge bg-danger" style="display:none; position:absolute; top:0; right:0;"></span>
                     </a>
+                    <!-- <a href="#" class="btn btn-notification">
+                        <i class="bi bi-bell"></i>
+                    </a> -->
                     <!-- Avatar de Usuario -->
                     <div class="user-avatar">
                       <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
@@ -121,6 +125,7 @@
     <script src="../../js/auth/checkAuth.js"></script>
     <script src="../../js/auth/logout.js"></script>
     <script src="../../js/groups.js"></script>
+    <script src="../../js/notifications.js"></script>
     <script src="../../js/search-autocomplete.js"></script>
     <script src="../../js/dark-theme.js"></script>
 </body>

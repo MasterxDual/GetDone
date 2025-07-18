@@ -13,6 +13,7 @@ const TaskComment = require('../models/taskCommentModel'); // Modelo de comentar
 const { Op } = require('sequelize'); // Operadores de Sequelize para consultas complejas
 const Group = require('../models/groupModel'); // Modelo de grupos
 const { User } = require('../models/userModel'); // Modelo de usuarios
+const Notification = require('../models/notificationModel'); // Modelo de notificaciones
 const { sendAssignmentEmail, sendDateChangedEmail } = require('./emailController');
 
 /**
@@ -75,6 +76,15 @@ async function newTask(req, res) {
 
         if(assignedUser && assignedUser.email) {
             await sendAssignmentEmail(assignedUser.email, tarea)
+
+            // Crea una notificación en la base de datos si se asignó una nueva tarea
+            await Notification.create({
+                userId: assignedTo,
+                type: 'assignment',
+                taskId: tarea.id,
+                message: `Tarea "${tarea.title}" asignada a ti.`,
+                isRead: false
+            });
         }
 
         res.status(201).json({ 
@@ -424,6 +434,15 @@ async function editTask(req, res) {
   if(req.body.delivery_date && req.body.delivery_date !== task.delivery_date) {
     // Enviar email: "La fecha de entrega de tu tarea ha sido modificada"
     await sendDateChangedEmail(userEmail.email, task, req.body.delivery_date);
+
+    // Crea una notificación en la base de datos si la fecha de entrega de la tarea fue modificada
+    await Notification.create({
+        userId: userId,
+        type: 'date_changed',
+        taskId: id,
+        message: `Tarea "${task.title}" fue modificada. Nueva fecha de entrega: ${req.body.delivery_date}.`,
+        isRead: false
+    });
 
     // Opcional: reiniciar flag para volver a enviar recordatorio cuando se acerque la fecha de vencimiento
     task.expiring_notification_sent = false;

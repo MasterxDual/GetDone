@@ -3,6 +3,7 @@ const  Task = require('../models/taskModel');
 const { User } = require('../models/userModel');
 const { sendExpiringTask } = require('../controllers/emailController'); // importa tu configuración de mailer
 const { Op } = require('sequelize');
+const Notification = require('../models/notificationModel'); // Importa el modelo de notificaciones
 
 /**
  * Tarea programada con cron que se ejecuta cada minuto.
@@ -54,6 +55,16 @@ cron.schedule('* * * * *', async () => {
 
         // Marca la tarea como notificada para evitar enviar múltiples correos
         task.expiring_notification_sent = true;
+
+        // Crea una notificación en la base de datos si la tarea está por vencer
+        await Notification.create({
+          userId: user.id,
+          type: 'expiring',
+          taskId: task.id,
+          message: `Tarea "${task.title}" está por vencer el ${task.delivery_date}.`,
+          isRead: false
+        });
+        
         await task.save();
       }
     }
