@@ -201,3 +201,35 @@ exports.sendExpiringTask = async(toEmail, task) => {
     });
 }
 
+/**
+ * Envía un correo electrónico notificando que la fecha de entrega de una tarea ha sido actualizada.
+ *
+ * @async
+ * @function sendDateChangedEmail
+ * @param {string} findUserByEmail - Dirección de correo electrónico del destinatario.
+ * @param {Object} task - Objeto que representa la tarea cuya fecha fue modificada.
+ * @param {string} task.title - Título de la tarea.
+ * @param {string|Date} new_delivery_date - Nueva fecha de entrega asignada a la tarea.
+ * @returns {Promise<void>} No retorna ningún valor directamente. Lanza un error si el envío falla.
+ *
+ * @example
+ * await sendDateChangedEmail('usuario@email.com', { title: 'Entrega final' }, '2025-07-20');
+ */
+exports.sendDateChangedEmail = async(findUserByEmail, task, new_delivery_date) => {
+    // Configurar el transporte de nodemailer para enviar correos electrónicos
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+
+    // Estructura del email a enviar
+    await transporter.sendMail({
+      from: `"GetDone Notificaciones" <${process.env.EMAIL_USER}>`,
+      to: findUserByEmail,
+      subject: 'Fecha de entrega actualizada',
+      text: `La fecha de entrega de la tarea "${task.title}" ha sido actualizada a ${new_delivery_date}.`
+    });
+}

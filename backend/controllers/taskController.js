@@ -13,7 +13,7 @@ const TaskComment = require('../models/taskCommentModel'); // Modelo de comentar
 const { Op } = require('sequelize'); // Operadores de Sequelize para consultas complejas
 const Group = require('../models/groupModel'); // Modelo de grupos
 const { User } = require('../models/userModel'); // Modelo de usuarios
-const { sendAssignmentEmail } = require('./emailController');
+const { sendAssignmentEmail, sendDateChangedEmail } = require('./emailController');
 
 /**
  * @function newTask
@@ -373,32 +373,32 @@ async function getComments(req, res) {
 }
 
 /**
- * Edita una tarea existente, actualizando su descripción y/o fecha de entrega.
- *
- * Solo los usuarios con rol de **admin** dentro del grupo asociado a la tarea pueden modificarla.
- * Requiere autenticación mediante JWT y debe usarse en conjunto con `authenticateToken`.
+ * Edita una tarea existente por su ID.
+ * Solo el administrador del grupo puede realizar la modificación.
+ * Si se modifica la fecha de vencimiento, se envía una notificación por correo electrónico al usuario.
  *
  * @async
  * @function editTask
- * @param {import('express').Request} req - Objeto de solicitud HTTP. Contiene:
- *   - `params.id`: ID de la tarea a editar.
- *   - `body.description`: Nueva descripción (opcional).
- *   - `body.delivery_date`: Nueva fecha de entrega en formato `YYYY-MM-DD` (opcional).
- *   - `user.id`: ID del usuario autenticado (desde JWT).
- * @param {import('express').Response} res - Objeto de respuesta HTTP. Devuelve la tarea actualizada o un mensaje de error.
+ * @param {Object} req - Objeto de solicitud Express.
+ * @param {Object} req.params - Parámetros de la URL.
+ * @param {string} req.params.id - ID de la tarea a editar.
+ * @param {Object} req.body - Cuerpo de la solicitud con los campos editables.
+ * @param {string} [req.body.description] - Nueva descripción de la tarea (opcional).
+ * @param {string} [req.body.delivery_date] - Nueva fecha de entrega de la tarea (opcional, formato YYYY-MM-DD).
+ * @param {Object} req.user - Objeto del usuario autenticado (inyectado por middleware).
+ * @param {number} req.user.id - ID del usuario autenticado (extraído del token JWT).
+ * @param {Object} res - Objeto de respuesta Express.
+ * @returns {Promise<void>} Retorna una respuesta JSON con la tarea editada o un mensaje de error.
  *
- * @returns {Promise<void>} No retorna directamente, pero responde con:
- *   - `200 OK` y la tarea actualizada si fue exitosa.
- *   - `403 Forbidden` si el usuario no es admin del grupo.
- *   - `404 Not Found` si la tarea no existe.
- *
- * @throws {Error} Si ocurre un error inesperado, responde con un error genérico del servidor.
+ * @throws {404} Si la tarea no existe.
+ * @throws {403} Si el usuario no es administrador del grupo de la tarea.
+ * @throws {500} Si ocurre un error en el servidor.
  *
  * @example
- * PUT /api/tasks/12
+ * PUT /api/tasks/5
  * {
- *   "description": "Actualizar el informe final",
- *   "delivery_date": "2025-08-01"
+ *   "description": "Actualizar lógica de validación",
+ *   "delivery_date": "2025-07-20"
  * }
  */
 async function editTask(req, res) {
@@ -413,8 +413,20 @@ async function editTask(req, res) {
     where: { userId, groupId: task.groupId }
   });
 
+  /* Solo trae la columna de email de la base de datos */
+  const userEmail = await User.findByPk(userId, { attributes: ['email'] });
+
   if (!membership || membership.role !== 'admin') {
     return res.status(403).json({ message: 'Solo el admin puede editar esta tarea.' });
+  }
+
+  // Verifica si se cambió la fecha de vencimiento de la tarea a completar
+  if(req.body.delivery_date && req.body.delivery_date !== task.delivery_date) {
+    // Enviar email: "La fecha de entrega de tu tarea ha sido modificada"
+    await sendDateChangedEmail(userEmail.email, task, req.body.delivery_date);
+
+    // Opcional: reiniciar flag para volver a enviar recordatorio cuando se acerque la fecha de vencimiento
+    task.expiring_notification_sent = false;
   }
 
   task.description = description || task.description;

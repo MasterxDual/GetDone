@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 
 /**
  * Tarea programada con cron que se ejecuta cada minuto.
- * Busca tareas cuya fecha de vencimiento sea mañana y envía un correo electrónico
+ * Busca tareas cuya fecha de vencimiento sea entre hoy y mañana y envía un correo electrónico
  * de notificación al usuario asignado si tiene correo electrónico registrado.
 *
 * @function
@@ -40,14 +40,21 @@ cron.schedule('* * * * *', async () => {
       where: {
         delivery_date: {
           [Op.between]: [today, tomorrow]
-        }
+        },
+        expiring_notification_sent: false // Busca tareas que a las que no se les ha enviado una notificación previamente
       }
     });
 
     for (const task of tasks) {
       const user = await User.findByPk(task.assignedTo);
+
+      // Verifica si el usuario tiene un email registrado
       if (user && user.email) {
-        await sendExpiringTask(user.email, task);
+        await sendExpiringTask(user.email, task); // Envía el correo de notificación de vencimiento
+
+        // Marca la tarea como notificada para evitar enviar múltiples correos
+        task.expiring_notification_sent = true;
+        await task.save();
       }
     }
 
