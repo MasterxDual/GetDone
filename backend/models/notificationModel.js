@@ -18,6 +18,10 @@ const Notification = sequelize.define('Notification', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
+  groupId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
   type: { // 'expiring', 'date_changed', 'assignment'
     type: DataTypes.STRING,
     allowNull: false,

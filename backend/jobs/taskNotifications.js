@@ -61,6 +61,7 @@ cron.schedule('* * * * *', async () => {
           userId: user.id,
           type: 'expiring',
           taskId: task.id,
+          groupId: task.groupId,
           message: `Tarea "${task.title}" está por vencer.<br>Fecha de vencimiento: ${task.delivery_date}.`,
           isRead: false
         });

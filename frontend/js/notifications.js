@@ -33,7 +33,7 @@ async function showNotificationsDropdown(event) {
     html += '<span class="dropdown-item-text">Sin notificaciones</span>';
   } else {
     notifications.forEach(n => {
-      html += `<div class="dropdown-item${n.isRead ? '' : ' fw-bold'}">
+      html += `<div class="dropdown-item${n.isRead ? '' : ' fw-bold'}" style="cursor: pointer" onclick="goToTaskFromNotification('${n.groupId}', '${n.taskId}')">
         <i class="bi bi-info-circle me-2"></i> ${n.message}
         <div class="text-muted small">${new Date(n.created_at).toLocaleString('es-AR', { 
           //Formato de 24 horas Argentina
@@ -113,4 +113,33 @@ async function deleteAllNotifications() {
   });
   updateNotificationBadge();
   document.getElementById('notificationsDropdown')?.remove();
+}
+
+/**
+ * Redirige al usuario a la pantalla correspondiente (admin o miembro)
+ * con los parámetros de grupo y tarea especificados en la URL.
+ *
+ * Esta función se utiliza para navegar desde una notificación hacia
+ * la vista de detalle de una tarea específica dentro de un grupo determinado.
+ *
+ * El rol del usuario se obtiene desde el `localStorage` con la clave `selectedGroupRole`.
+ * En caso de no encontrarse, se asume el rol "member" por defecto.
+ *
+ * @function
+ * @param {number|string} groupId - ID del grupo al que pertenece la tarea.
+ * @param {number|string} taskId - ID de la tarea a la que se debe redirigir.
+ *
+ * @example
+ * goToTaskFromNotification(3, 12);
+ * // Si el usuario es admin => redirige a /views/admin/group-admin.html?groupId=3&taskId=12
+ * // Si es miembro u otro => redirige a /views/user/group-member.html?groupId=3&taskId=12
+ */
+function goToTaskFromNotification(groupId, taskId) {
+  const role = localStorage.getItem('selectedGroupRole') || 'member';
+
+  if (role === 'admin') {
+    window.location.href = `/views/admin/group-admin.html?groupId=${groupId}&taskId=${taskId}`;
+  } else {
+    window.location.href = `/views/user/group-member.html?groupId=${groupId}&taskId=${taskId}`;
+  }
 }
