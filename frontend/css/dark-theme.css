@@ -158,7 +158,6 @@ body.dark-mode .card-footer.bg-white {
 
 /* Estilos para botones claros en modo oscuro */
 body.dark-mode button {
-  background-color: #343a40 !important; /* gris oscuro */
   color: #f8f9fa !important;            /* texto claro */
   border: 1px solid #495057 !important; /* borde tenue */
 }
