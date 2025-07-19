@@ -1,5 +1,12 @@
 // Limpia el localStorage al cargar la página
-localStorage.clear();
+// localStorage.clear();
+
+// Borramos solo datos sensibles, para no perder la preferencia del tema oscuro
+localStorage.removeItem('token');
+localStorage.removeItem('userId');
+localStorage.removeItem('selectedGroupId');
+localStorage.removeItem('selectedGroupRole');
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // Seleccionar el formulario de Login

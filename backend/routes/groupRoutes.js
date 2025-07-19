@@ -49,6 +49,17 @@ router.post('/invite', groupController.inviteUser);
 router.post('/accept', groupController.acceptInvitation);
 
 /**
+ * Buscar grupos por nombre o descripción
+ * GET /api/groups/search?query=texto
+ * @api {GET} /api/groups/search || /api/groups/search?query=texto
+ * @apiName SearchGroups
+ * @apiGroup Groups
+ * @apiParam {String} query Texto a buscar en nombre o descripción de grupos
+ * @apiSuccess {Array} groups Lista de grupos que coinciden con la búsqueda
+ */
+router.get('/search', authenticateToken, groupController.searchGroups);
+
+/**
  * Obtener los detalles de un grupo por su ID
  * GET /api/groups/:id
  */
@@ -59,5 +70,6 @@ router.get('/:id', groupController.getGroupById);
  * GET /api/groups/:id/members
  */
 router.get('/:id/members', groupController.getGroupMembers);
+
 
 module.exports = router;

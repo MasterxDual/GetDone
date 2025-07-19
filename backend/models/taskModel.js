@@ -48,7 +48,7 @@ const Task = sequelize.define('Task', {
     }
   },
     status: {
-      type: DataTypes.ENUM('pending', 'completed'),
+      type: DataTypes.ENUM('pending', 'completed', 'expiring-soon'),
       defaultValue: 'pending'
   },
   // Campo 'delivery_date' para almacenar solo la fecha (sin hora), obligatorio
@@ -64,6 +64,11 @@ const Task = sequelize.define('Task', {
   // Campo 'completedAt' para almacenar la fecha de finalización, opcional
   completedAt: {
     type: DataTypes.DATE
+  },
+  // Campo 'expiring_notification_sent' para indicar si se ha enviado una notificación de vencimiento previamente
+  expiring_notification_sent: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false // Indica si se ha enviado la notificación de vencimiento
   }
 }, { // Configuración adicional para el modelo
 

@@ -43,27 +43,41 @@ async function loadGroups() {
 
         const groups = await response.json();
 
+        // --- NUEVO: Filtrar por groupId si viene en la URL ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const groupId = urlParams.get('groupId');
+
+        let filteredGroups = groups;
+        
+        if (groupId) {
+            filteredGroups = groups.filter(group => String(group.id) === String(groupId));
+        }
+
         // 3. Renderizar lista de grupos
         const list = document.getElementById('groupList');
         list.innerHTML = ''; // Limpiar lista existente
         
-        groups.forEach(group => {
-            const html = `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">${group.name}</h5>
-                        <p class="card-text">${group.description}</p>
-                        <button 
-                            class="btn btn-primary view-group-btn" 
-                            data-group-id="${group.id}" 
-                            data-role="${group.role}">
-                            View Group
-                        </button>
+        if(filteredGroups.length === 0) {
+            list.innerHTML = `<div class="alert alert-info">No se encontró el grupo solicitado.</div>`;
+        } else {
+            filteredGroups.forEach(group => {
+                const html = `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">${group.name}</h5>
+                            <p class="card-text">${group.description}</p>
+                            <button 
+                                class="btn btn-primary view-group-btn" 
+                                data-group-id="${group.id}" 
+                                data-role="${group.role}">
+                                View Group
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `;
-            list.innerHTML += html; // Agregar cada grupo a la lista
-        });
+                `;
+                list.innerHTML += html; // Agregar cada grupo a la lista
+            });
+        }
         
         // 4. Configurar event listeners para los botones
         document.querySelectorAll('.view-group-btn').forEach(btn => {
