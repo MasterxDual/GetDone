@@ -443,13 +443,28 @@ async function editTask(req, res) {
             message: `Tarea "${task.title}" fue modificada.<br>Nueva fecha de entrega: ${req.body.delivery_date}.`,
             isRead: false
         });
-    
+
         // Opcional: reiniciar flag para volver a enviar recordatorio cuando se acerque la fecha de vencimiento
         task.expiring_notification_sent = false;
   }
 
   task.description = description || task.description;
   task.delivery_date = delivery_date || task.delivery_date;
+
+  /* OPCIÓN 1: RECALCULAR STATUS para que se contemple la actualización del estado en la BD y en la UI
+  Esto corrije el error que sucedía al cambiar la fecha de vencimiento de una tarea en rojo a una tarea pendiente,
+  quitando así el color rojo de la UI */
+  const now = new Date();
+  const due = new Date(task.delivery_date);
+  const diffDays = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
+
+  if (task.completed) {
+    task.status = 'completed';
+  } else if (diffDays <= 1 && diffDays >= 0) {
+    task.status = 'expiring-soon';
+  } else {
+    task.status = 'pending';
+  }
 
   await task.save();
 
