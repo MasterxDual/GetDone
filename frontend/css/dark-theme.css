@@ -1,7 +1,7 @@
 /* --- Tema Oscuro --- */
 /* Se reutiliza en todas las pantallas, sino se aplicará a una única página*/
 body.dark-mode {
-  background-color: #181a1b !important;
+  background-color: #23272b !important;
   color: #f1f3f4 !important;
 }
 
@@ -71,7 +71,7 @@ body.dark-mode .form-label {
 /* Asegura que la parte derecha de la pantalla se pinte de negro (login, forgot-password y register) */
 body.dark-mode .login-form,
 body.dark-mode .login-right {
-    background-color: #181a1b !important;
+    background-color: #23272b !important;
     color: #f1f3f4 !important;
 }
 
@@ -158,7 +158,8 @@ body.dark-mode .card-footer.bg-white {
 
 /* Estilos para botones claros en modo oscuro */
 body.dark-mode button {
-  color: #f8f9fa !important;            /* texto claro */
+  background-color: #0d6efd !important; /* azul claro */
+  color: #fff !important;            /* texto claro */
   border: 1px solid #495057 !important; /* borde tenue */
 }
 
