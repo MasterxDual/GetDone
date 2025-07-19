@@ -40,13 +40,6 @@ const Notification = require('../models/notificationModel'); // Importa el model
  * });
  */
 async function getNotifications(req, res) {
-    const userId = req.user.id;
-    const notifications = await Notification.findAll({
-        where: { userId },
-        order: [['createdAt', 'DESC']]
-    });
-
-    res.json(notifications);
     try {
         const userId = req.user.id;
         const notifications = await Notification.findAll({

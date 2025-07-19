@@ -12,21 +12,32 @@ window.addEventListener('DOMContentLoaded', function() {
 
 async function showNotificationsDropdown(event) {
   event.preventDefault();
+  event.stopPropagation();
+
+  // Elimina dropdowns viejos si hay
+  document.getElementById('notificationsDropdown')?.remove();
+
   const token = localStorage.getItem('token');
   const res = await fetch('http://localhost:3000/api/notifications', {
+    method: 'GET',
     headers: { 'Authorization': `Bearer ${token}` }
   });
   const notifications = await res.json();
+  
 
   // Construye el HTML del dropdown
-  let html = '<div class="dropdown-menu show" id="notificationsDropdown" style="width:350px; max-height:400px; overflow:auto;">';
+  
+  // let html = '<div class="dropdown-menu show" id="notificationsDropdown" style="width:350px; max-height:400px; overflow:auto;">';
+  // let html = '<div class="dropdown-menu" id="notificationsDropdown">';
+  let html = '<div class="dropdown-menu show" id="notificationsDropdown" style="width:350px; max-height:400px; overflow:auto; right:0; top:100%; position:absolute; z-index:999;">';
+  
   if (notifications.length === 0) {
     html += '<span class="dropdown-item-text">Sin notificaciones</span>';
   } else {
     notifications.forEach(n => {
       html += `<div class="dropdown-item${n.isRead ? '' : ' fw-bold'}">
         <i class="bi bi-info-circle me-2"></i> ${n.message}
-        <div class="text-muted small">${new Date(n.createdAt).toLocaleString()}</div>
+        <div class="text-muted small">${new Date(n.created_at).toLocaleString()}</div>
       </div>`;
     });
     html += '<div class="dropdown-divider"></div><button class="dropdown-item text-center text-primary" onclick="markAllNotificationsRead()">Marcar todas como leídas</button>';
@@ -34,11 +45,12 @@ async function showNotificationsDropdown(event) {
   html += '</div>';
 
   // Borra otros dropdowns y muestra este
-  document.body.insertAdjacentHTML('beforeend', html);
+  const iconContainer = document.querySelector('.notification-icon-container');
+  iconContainer.insertAdjacentHTML('beforeend', html);
 
   // Opcional: cierra al hacer click fuera
   document.addEventListener('click', function closeDropdown(e) {
-    if (!e.target.closest('#notificationsDropdown')) {
+    if (!e.target.closest('#notificationsDropdown') && !e.target.closest('.notification-icon-container')) {
       document.getElementById('notificationsDropdown')?.remove();
       document.removeEventListener('click', closeDropdown);
     }
@@ -59,6 +71,7 @@ async function markAllNotificationsRead() {
 async function updateNotificationBadge() {
   const token = localStorage.getItem('token');
   const res = await fetch('http://localhost:3000/api/notifications', {
+    method: 'GET',
     headers: { 'Authorization': `Bearer ${token}` }
   });
   const notifications = await res.json();

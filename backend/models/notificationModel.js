@@ -9,10 +9,14 @@ const sequelize = require('../config/sequelize');
 // Definimos el modelo 'Notificacion' usando sequelize.define()
 // Este modelo representa una tabla llamada 'Notificaciones' en la base de datos (Sequelize pluraliza por defecto)
 const Notification = sequelize.define('Notification', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    field: 'user_id'
+    allowNull: false
   },
   type: { // 'expiring', 'date_changed', 'assignment'
     type: DataTypes.STRING,
@@ -20,8 +24,7 @@ const Notification = sequelize.define('Notification', {
   },
   taskId: {
     type: DataTypes.INTEGER,
-    allowNull: true,
-    field: 'task_id'
+    allowNull: true
   },
   message: {
     type: DataTypes.STRING,
@@ -29,7 +32,7 @@ const Notification = sequelize.define('Notification', {
   },
   isRead: { // Para saber si ya la vio el usuario
     type: DataTypes.BOOLEAN,
-    defaultValue: false,
+    defaultValue: false
   }
 }, {
     tableName: 'notifications',             // Definimos el nombre de la tabla en la base de datos

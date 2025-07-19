@@ -74,8 +74,12 @@
                     </div>
                     <!-- Notificaciones y Perfil de Usuario -->
                     <a href="#" class="btn btn-notification" id="notificationBell" onclick="showNotificationsDropdown(event)">
-                      <i class="bi bi-bell"></i>
-                      <span id="notificationBadge" class="badge bg-danger" style="display:none; position:absolute; top:0; right:0;"></span>
+                      <div class="notification-icon-container">
+                        <!-- Campana de notificaciones -->
+                          <i class="bi bi-bell"></i>
+                          <!-- Circulo rojo que marca cuantas notificaciones hay -->
+                          <span id="notificationBadge" class="badge bg-danger"></span>
+                      </div>  
                     </a>
                     <!-- <a href="#" class="btn btn-notification">
                         <i class="bi bi-bell"></i>

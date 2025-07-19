@@ -440,7 +440,7 @@ async function editTask(req, res) {
         userId: userId,
         type: 'date_changed',
         taskId: id,
-        message: `Tarea "${task.title}" fue modificada. Nueva fecha de entrega: ${req.body.delivery_date}.`,
+        message: `Tarea "${task.title}" fue modificada.<br>"Nueva fecha de entrega: ${req.body.delivery_date}.`,
         isRead: false
     });
 
