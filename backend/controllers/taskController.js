@@ -437,10 +437,10 @@ async function editTask(req, res) {
 
     // Crea una notificación en la base de datos si la fecha de entrega de la tarea fue modificada
     await Notification.create({
-        userId: userId,
+        userId: task.assignedTo,
         type: 'date_changed',
         taskId: id,
-        message: `Tarea "${task.title}" fue modificada.<br>"Nueva fecha de entrega: ${req.body.delivery_date}.`,
+        message: `Tarea "${task.title}" fue modificada.<br>Nueva fecha de entrega: ${req.body.delivery_date}.`,
         isRead: false
     });
 

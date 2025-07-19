@@ -90,7 +90,32 @@ async function markNotificationAsRead(req, res) {
     }
 }
 
+/**
+ * Elimina todas las notificaciones asociadas al usuario autenticado.
+ *
+ * @async
+ * @function deleteAllNotifications
+ * @param {Object} req - Objeto de solicitud de Express. Debe contener el usuario autenticado en `req.user`.
+ * @param {Object} res - Objeto de respuesta de Express, utilizado para devolver el resultado al cliente.
+ * @returns {Promise<void>} Devuelve una respuesta JSON indicando éxito o error.
+ *
+ * @throws {500} En caso de error durante la eliminación en la base de datos, responde con estado HTTP 500.
+ */
+async function deleteAllNotifications(req, res) {
+  try {
+    const userId = req.user.id;
+    await Notification.destroy({
+      where: { userId }
+    });
+    res.json({ message: 'Todas las notificaciones borradas' });
+  } catch (error) {
+    console.error('Error al borrar notificaciones:', error);
+    res.status(500).json({ error: 'Error interno al borrar notificaciones' });
+  }
+}
+
 module.exports = {
     getNotifications,
-    markNotificationAsRead
+    markNotificationAsRead,
+    deleteAllNotifications
 };

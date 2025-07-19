@@ -27,8 +27,6 @@ async function showNotificationsDropdown(event) {
 
   // Construye el HTML del dropdown
   
-  // let html = '<div class="dropdown-menu show" id="notificationsDropdown" style="width:350px; max-height:400px; overflow:auto;">';
-  // let html = '<div class="dropdown-menu" id="notificationsDropdown">';
   let html = '<div class="dropdown-menu show" id="notificationsDropdown" style="width:350px; max-height:400px; overflow:auto; right:0; top:100%; position:absolute; z-index:999;">';
   
   if (notifications.length === 0) {
@@ -37,10 +35,23 @@ async function showNotificationsDropdown(event) {
     notifications.forEach(n => {
       html += `<div class="dropdown-item${n.isRead ? '' : ' fw-bold'}">
         <i class="bi bi-info-circle me-2"></i> ${n.message}
-        <div class="text-muted small">${new Date(n.created_at).toLocaleString()}</div>
+        <div class="text-muted small">${new Date(n.created_at).toLocaleString('es-AR', { 
+          //Formato de 24 horas Argentina
+          hour12: false,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}</div>
       </div>`;
     });
-    html += '<div class="dropdown-divider"></div><button class="dropdown-item text-center text-primary" onclick="markAllNotificationsRead()">Marcar todas como leídas</button>';
+    html += `
+      <div class="dropdown-divider"></div>
+      <div class=d-flex justify-content-between">
+        <button class="dropdown-item text-primary" onclick="markAllNotificationsRead()">Marcar todas como leídas</button>
+        <button class="dropdown-item text-danger" onclick="deleteAllNotifications()">Eliminar todas</button>
+    `;
   }
   html += '</div>';
 
@@ -83,4 +94,23 @@ async function updateNotificationBadge() {
   } else {
     badge.style.display = 'none';
   }
+}
+
+/**
+ * Elimina todas las notificaciones del usuario autenticado mediante una solicitud HTTP DELETE
+ * al endpoint correspondiente. Luego actualiza el contador de notificaciones y cierra el menú desplegable.
+ *
+ * @async
+ * @function deleteAllNotifications
+ * @returns {Promise<void>} No retorna ningún valor, pero actualiza visualmente el contador de notificaciones
+ * y elimina el dropdown del DOM si existe.
+ */
+async function deleteAllNotifications() {
+  const token = localStorage.getItem('token');
+  await fetch('http://localhost:3000/api/notifications/deleteall', {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  updateNotificationBadge();
+  document.getElementById('notificationsDropdown')?.remove();
 }

@@ -8,6 +8,8 @@ const authenticateToken = require('../middleware/authMiddleware');
 
 // Importa los controladores de tareas que controlan la logica de los Endpoints
 const notificationController = require("../controllers/notificationController");
+const { deleteAllNotifications } = require('../controllers/notificationController');
+
 
 // Middleware para proteger todas las rutas de tareas
 router.use(authenticateToken);
@@ -22,13 +24,22 @@ router.use(authenticateToken);
  * */  
 router.get("/", authenticateToken, notificationController.getNotifications);
 
-/** * Ruta para marcar una notificación como leída
+/** Ruta para marcar una notificación como leída
  * @api {POST} /api/notifications/markasread
  * @apiName MarkNotificationAsRead
  * @apiGroup Notifications
  * @apiSuccess {String} respuesta JSON que indica que la operación fue exitosa
  * */
 router.post("/markasread", authenticateToken, notificationController.markNotificationAsRead);
+
+/** Ruta para eliminar todas las notificaciones
+ * @api {DELETE} /api/notifications/deleteall
+ * @apiName DeleteAllNotifications
+ * @apiGroup Notifications
+ * @apiSuccess {String} respuesta JSON que indica que la operación fue exitosa
+*/
+router.delete('/deleteall', authenticateToken, notificationController.deleteAllNotifications);
+
 
 // Exporta el enrutador para que pueda ser utilizado en la aplicación principal
 // Esto permite que las rutas de notificaciones sean accesibles desde la aplicación principal
