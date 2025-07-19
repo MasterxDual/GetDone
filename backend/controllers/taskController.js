@@ -423,29 +423,29 @@ async function editTask(req, res) {
     where: { userId, groupId: task.groupId }
   });
 
-  /* Solo trae la columna de email de la base de datos */
-  const userEmail = await User.findByPk(userId, { attributes: ['email'] });
-
+  
   if (!membership || membership.role !== 'admin') {
-    return res.status(403).json({ message: 'Solo el admin puede editar esta tarea.' });
-  }
+      return res.status(403).json({ message: 'Solo el admin puede editar esta tarea.' });
+    }
+    
+    // Verifica si se cambió la fecha de vencimiento de la tarea a completar
+    if(req.body.delivery_date && req.body.delivery_date !== task.delivery_date) {
+        /* Solo trae la columna de email de la base de datos */
+        const assignedUser = await User.findByPk(task.assignedTo, { attributes: ['email'] });
+        // Enviar email: "La fecha de entrega de tu tarea ha sido modificada"
+        await sendDateChangedEmail(assignedUser.email, task, req.body.delivery_date);
 
-  // Verifica si se cambió la fecha de vencimiento de la tarea a completar
-  if(req.body.delivery_date && req.body.delivery_date !== task.delivery_date) {
-    // Enviar email: "La fecha de entrega de tu tarea ha sido modificada"
-    await sendDateChangedEmail(userEmail.email, task, req.body.delivery_date);
-
-    // Crea una notificación en la base de datos si la fecha de entrega de la tarea fue modificada
-    await Notification.create({
-        userId: task.assignedTo,
-        type: 'date_changed',
-        taskId: id,
-        message: `Tarea "${task.title}" fue modificada.<br>Nueva fecha de entrega: ${req.body.delivery_date}.`,
-        isRead: false
-    });
-
-    // Opcional: reiniciar flag para volver a enviar recordatorio cuando se acerque la fecha de vencimiento
-    task.expiring_notification_sent = false;
+        // Crea una notificación en la base de datos si la fecha de entrega de la tarea fue modificada
+        await Notification.create({
+            userId: task.assignedTo,
+            type: 'date_changed',
+            taskId: id,
+            message: `Tarea "${task.title}" fue modificada.<br>Nueva fecha de entrega: ${req.body.delivery_date}.`,
+            isRead: false
+        });
+    
+        // Opcional: reiniciar flag para volver a enviar recordatorio cuando se acerque la fecha de vencimiento
+        task.expiring_notification_sent = false;
   }
 
   task.description = description || task.description;
