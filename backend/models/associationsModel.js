@@ -6,6 +6,8 @@ const GroupMember = require('./groupMemberModel');
 const Task = require('./taskModel');
 const TaskComment = require('./taskCommentModel');
 const Invitation = require('./invitationModel');
+const Notification = require('./notificationModel'); // No olvides importarlo
+
 
 // Establecer asociaciones
 
@@ -116,6 +118,27 @@ User.hasMany(Invitation, {
 Invitation.belongsTo(User, {
   foreignKey: 'invitedBy',
   as: 'inviter'
+});
+
+
+// Un usuario tiene muchas notificaciones
+User.hasMany(Notification, {
+  foreignKey: 'userId', // ¡usa snake_case real de tu tabla!
+  as: 'notifications'
+});
+Notification.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
+// Una tarea puede tener muchas notificaciones
+Task.hasMany(Notification, {
+  foreignKey: 'taskId',
+  as: 'notifications'
+});
+Notification.belongsTo(Task, {
+  foreignKey: 'taskId',
+  as: 'task'
 });
 
 module.exports = {

@@ -355,6 +355,61 @@ async function getGroupMembers(req, res) {
     }
 }
 
+/**
+ * @function searchGroups
+ * @description Controlador para realizar una búsqueda de grupos por nombre.
+ * Permite filtrar los grupos existentes según un texto ingresado por el usuario.
+ * La búsqueda es insensible a mayúsculas y minúsculas.
+ * 
+ * @async
+ * @param {Object} req - Objeto de solicitud (Express).
+ * @param {Object} req.query - Contiene los parámetros de consulta.
+ * @param {string} req.query.query - Texto ingresado para realizar la búsqueda. Si no se proporciona, se asume cadena vacía.
+ * @param {Object} res - Objeto de respuesta (Express).
+ * 
+ * @returns {JSON} 200 - Lista de hasta 10 grupos cuyo nombre coincida parcialmente con el texto buscado.
+ * @returns {JSON} 500 - Si ocurre un error inesperado en el servidor.
+ * 
+ * @example
+ * // Solicitud:
+ * GET /api/groups/search?query=work
+ * 
+ * // Respuesta:
+ * [
+ *   { id: 1, name: "Work Group", ... },
+ *   { id: 2, name: "Working Team", ... }
+ * ]
+ * 
+ * @remarks
+ * - Utiliza Sequelize y el operador `Op.iLike` para realizar una búsqueda que no distingue mayúsculas.
+ * - Se limita a un máximo de 10 resultados ordenados alfabéticamente.
+ */
+async function searchGroups(req, res) {
+    const query = req.query.query || '';
+    const userId = req.user.id; // Debes tener auth middleware que setee req.user
+
+    try {
+        const groups = await Group.findAll({
+            where: {
+                name: {
+                    [Op.iLike]: `%${query}%` // Búsqueda insensible a mayúsculas
+                }
+            },
+            include: [{
+                model: User,
+                as: 'members',
+                where: { id: userId }, // Solo incluir grupos donde el usuario es miembro
+            }],
+            limit: 10, // máximo 10 resultados
+            order: [['name', 'ASC']]
+        });
+
+        res.json(groups);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al buscar grupos' });
+    }
+}
+
 // Exportar todas las funciones del controlador
 module.exports = {
     createGroup,
@@ -363,5 +418,6 @@ module.exports = {
     inviteUser,
     acceptInvitation,
     getGroupById,
-    getGroupMembers
+    getGroupMembers,
+    searchGroups
 };

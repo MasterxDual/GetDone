@@ -13,12 +13,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="../../css/dark-theme.css">
+    <link rel="stylesheet" href="../../css/search-autocomplete.css">
 </head>
 <body>
     <div class="container">
         <!-- Barra Lateral -->
         <div class="slidebar d-flex flex-column p-3">
-            <h4 class="mb-3"><i class="bi bi-check2-square"></i> GetDone</h4>
+            <h4 class="mb-3">
+                <a href="../../index.html" class="text-decoration-none text-reset">
+                    <i class="bi bi-check2-square"></i> GetDone
+                </a>
+            </h4>
             <ul class="nav nav-pills flex-column mb-auto">
                 <li class="nav-item">
                     <a class="nav-link active" href="../user/home.html">
@@ -61,13 +67,23 @@
                 <form class="d-flex align-items-center">
                     <!-- Buscador -->
                     <div class="search-container position-relative">
-                        <input class="form-control pe-5" type="search" placeholder="Search...">
+                        <input class="form-control pe-5" type="search" id="searchBar" placeholder="Search..." autocomplete="off">
                         <i class="bi bi-search position-absolute end-0 top-50 translate-middle-y me-4"></i>
+                        <!-- Aquí va el dropdown de sugerencias -->
+                        <div id="searchSuggestions" class="search-suggestions"></div>
                     </div>
                     <!-- Notificaciones y Perfil de Usuario -->
-                    <a href="#" class="btn btn-notification">
-                        <i class="bi bi-bell"></i>
+                    <a href="#" class="btn btn-notification" id="notificationBell" onclick="showNotificationsDropdown(event)">
+                      <div class="notification-icon-container">
+                        <!-- Campana de notificaciones -->
+                          <i class="bi bi-bell"></i>
+                          <!-- Circulo rojo que marca cuantas notificaciones hay -->
+                          <span id="notificationBadge" class="badge bg-danger"></span>
+                      </div>  
                     </a>
+                    <!-- <a href="#" class="btn btn-notification">
+                        <i class="bi bi-bell"></i>
+                    </a> -->
                     <!-- Avatar de Usuario -->
                     <div class="user-avatar">
                       <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
@@ -123,6 +139,49 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal para editar tarea -->
+    <div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Formulario para editar una tarea -->
+          <form id="editTaskForm">
+
+            <!-- Encabezado del modal -->
+            <div class="modal-header">
+              <h5 class="modal-title" id="editTaskModalLabel">Editar Tarea</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <!-- Cuerpo del modal con campos editables -->
+            <div class="modal-body">
+                <!-- Campo oculto para guardar el ID de la tarea -->
+              <input type="hidden" id="editTaskId" name="taskId">
+
+              <!-- Campo de descripción -->
+              <div class="mb-3">
+                <label for="editTaskDescription" class="form-label">Descripción</label>
+                <textarea class="form-control" id="editTaskDescription" name="description" required></textarea>
+              </div>
+
+              <!-- Campo de fecha de expiración -->
+              <div class="mb-3">
+                <label for="editTaskDate" class="form-label">Fecha de Expiración</label>
+                <input type="date" class="form-control" id="editTaskDate" name="delivery_date" required>
+              </div>
+            </div>
+
+            <!-- Pie del modal con botones de acción -->
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </div>
+            
+          </form>
+        </div>
+      </div>
+    </div>
     
     <!-- Bootstrap's JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
@@ -131,5 +190,8 @@
     <script src="../../js/auth/logout.js"></script>
     <script src="../../js/tasks-list.js"></script>
     <script src="../../js/group-admin.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/search-autocomplete.js"></script>
+    <script src="../../js/dark-theme.js"></script>
 </body>
 </html>

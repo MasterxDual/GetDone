@@ -61,6 +61,89 @@ async function createUser(firstName, lastName, email, password) {
     return await User.create({ firstName, lastName, email, password }); // Crea un nuevo usuario
 }
 
+/**
+ * Actualiza la contraseña de un usuario en la base de datos.
+ *
+ * Esta función busca un usuario por su dirección de correo electrónico (normalizada a minúsculas
+ * y sin espacios) y actualiza su contraseña por una nueva ya hasheada.
+ *
+ * @async
+ * @function updateUserPassword
+ * @param {string} email - Correo electrónico del usuario al que se desea cambiar la contraseña.
+ * @param {string} hashedPassword - Nueva contraseña hasheada que será almacenada.
+ * @returns {Promise<number[]>} - Retorna un array donde el primer elemento indica cuántas filas fueron actualizadas (por ejemplo: [1] si se modificó un usuario).
+ *
+ * @example
+ * const result = await updateUserPassword('ejemplo@email.com', hashedPassword);
+ * if (result[0] === 0) {
+ *   console.log('No se encontró el usuario o no se actualizó la contraseña.');
+ * }
+ */
+async function updateUserPassword(email, hashedPassword) {
+    return await User.update(
+        { password: hashedPassword },
+        { where: { email: email.trim().toLowerCase() } }
+    );
+}
+
+
+/** * Actualiza los nombres de un usuario en la base de datos.
+ * * Esta función busca un usuario por su ID y actualiza sus nombres (firstName y lastName).
+ * * @async
+ * * @function updateNames
+ * * @param {number} id - ID del usuario al que se desea cambiar los nombres.
+ * * @param {string} firstName - Nuevo nombre del usuario.
+ * * @param {string} lastName - Nuevo apellido del usuario.
+ * * @returns {Promise<number[]>} - Retorna un array donde el primer elemento indica cuántas filas fueron actualizadas (por ejemplo: [1] si se modificó un usuario).
+ * * @example
+ * * const result = await updateNames(1, 'NuevoNombre', 'NuevoApellido');
+ * * if (result[0] === 0) { * console.log('No se encontró el usuario o no se actualizó el nombre.'); *  }
+ * */
+// async function updateNames(id, firstName, lastName) {
+//     return await User.update({ firstName, lastName }, { where: { id } });
+// }
+
+
+
+/** * Actualiza la contraseña de un usuario por su ID.
+ * Esta función busca un usuario por su ID y actualiza su contraseña.
+ * @async
+ * @function updatePassword
+ * @param {number} id - ID del usuario al que se desea cambiar la contraseña.
+ * @param {string} password - Nueva contraseña que será almacenada (ya debe estar hasheada).
+ * @returns {Promise<number[]>} - Retorna un array donde el primer elemento indica cuántas filas fueron actualizadas (por ejemplo: [1] si se modificó un usuario).
+ * @example
+ * const result = await updatePassword(1, 'nuevaContraseñaHasheada');
+ * if (result[0] === 0) {
+ *   console.log('No se encontró el usuario o no se actualizó la contraseña.');
+ * }
+ */
+async function updatePassword(id, password) {
+    return await User.update({ password }, { where: { id } });
+}
+
+
+/**
+ * Actualiza dinámicamente un campo específico del perfil del usuario en la base de datos.
+ *
+ * @async
+ * @function updateField
+ * @param {number|string} userId - ID del usuario cuyo campo será actualizado.
+ * @param {string} field - Nombre del campo a actualizar (ej. 'firstName', 'lastName').
+ * @param {string} value - Nuevo valor que se asignará al campo.
+ * @returns {Promise<[number, User[]]>} Resultado de la operación de actualización de Sequelize. 
+ * Devuelve un array donde el primer elemento es el número de filas afectadas.
+ *
+ * @throws {Error} Lanza un error si la operación de actualización falla.
+ */
+async function updateField(userId, field, value) {
+  const update = {};
+  update[field] = value;
+  
+  return await User.update(update, {
+    where: { id: userId }
+  });
+}
 
 // Exporta:
 // - El modelo User (para usarlo en relaciones o consultas personalizadas).
@@ -69,6 +152,10 @@ module.exports = {
     User,
     findUserByEmail,
     createUser,
+    updateUserPassword,
+    updatePassword,
+    updateField
+    // updateNames,
 };
 
 

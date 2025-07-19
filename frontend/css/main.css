@@ -159,3 +159,55 @@ body {
         right: 1rem;
     }
 }
+
+/* Estilo para recuadros de tareas a punto de vencer*/
+.expiring-soon {
+  background-color: #dc3545; /* Bootstrap rojo */
+  color: #fff;
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
+/* Estilo para tareas a completar */
+.bg-success {
+  background-color: #dc3545; /* Bootstrap rojo */
+  color: #fff;
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
+#notificationBadge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #e53935;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    z-index: 10;
+
+}
+.notification-icon-container {
+    position: relative;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+}
+
+.notification-icon-container i {
+    font-size: 24px;
+    display: block;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 350px;
+    max-height: 400px;
+    overflow: auto;
+    z-index: 20;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}

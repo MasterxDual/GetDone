@@ -16,6 +16,7 @@ require('dotenv').config();
 const userRoutes = require('./routes/userRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const groupRoutes = require('./routes/groupRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const authenticateToken = require('./middleware/authMiddleware');
 
 // Importa la configuración de Sequelize para establecer la conexión a la base de datos
@@ -24,6 +25,10 @@ const sequelize = require('./config/sequelize');
 // IMPORTANTE: Importar las asociaciones de los modelos ANTES de sincronizar
 // Esto debe hacerse después de importar sequelize pero antes de sync()
 require('./models/associationsModel');
+
+//Esto inicia el servicio de cron para ejecutar diariamente y avisar al usuario que 
+//la tarea que tiene está por vencerse (1 día o menos de vencimiento)
+require('./jobs/taskNotifications')
 
 // Crear una instancia de la aplicación Express
 const app = express();
@@ -66,6 +71,7 @@ app.get('/views/auth/:page', (req, res) => {
 app.use('/api/users', userRoutes); // Monta la rutas de usuarios bajo /api/users
 app.use('/api/tasks', authenticateToken, taskRoutes); // Protege rutas de tareas con JWT
 app.use('/api/groups', authenticateToken, groupRoutes); // Protege rutas de grupos con JWT
+app.use('/api/notifications', authenticateToken, notificationRoutes); // Protege rutas de notificaciones con JWT
 
 // Puerto del servidor
 const PORT = 3000;
@@ -96,6 +102,8 @@ sequelize.sync({ alter: true }) // Cambiado de sync() a sync({ alter: true })
             console.log('   - GET  / (página de bienvenida)');
             console.log('   - API  /api/users (gestión de usuarios)');
             console.log('   - API  /api/tasks (gestión de tareas)');
+            console.log('   - API  /api/groups (gestión de grupos)');
+            console.log('   - API  /api/notifications (gestión de notificaciones)');
         });
     })
     .catch(err => {
