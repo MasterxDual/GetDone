@@ -250,3 +250,23 @@ body.dark-mode .form-control:focus {
   border-color: #495057 !important;
   box-shadow: 0 0 0 0.25rem rgba(52, 58, 64, 0.25);
 }
+
+/* Agregamos los estilos para el dropdown de notificaciones de la UI */
+body.dark-mode .dropdown-menu,
+body.dark-mode .dropdown-item,
+body.dark-mode .dropdown-menu .dropdown-item-text,
+body.dark-mode .dropdown-menu .dropdown-item,
+body.dark-mode .dropdown-menu .dropdown-divider,
+body.dark-mode .dropdown-menu .dropdown-item .text-muted {
+    color: #fff !important;
+}
+
+body.dark-mode .dropdown-menu .dropdown-item.btn,
+body.dark-mode .dropdown-menu button {
+    color: #fff !important;
+}
+
+/* Se asegura que los textos secundarios sean más claros */
+body.dark-mode .dropdown-menu .text-muted {
+    color: #b0b8c1 !important;
+}
