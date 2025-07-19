@@ -33,7 +33,7 @@ async function showNotificationsDropdown(event) {
     html += '<span class="dropdown-item-text">Sin notificaciones</span>';
   } else {
     notifications.forEach(n => {
-      html += `<div class="dropdown-item${n.isRead ? '' : ' fw-bold'}" style="cursor: pointer" onclick="goToTaskFromNotification('${n.groupId}', '${n.taskId}')">
+      html += `<div class="dropdown-item${n.isRead ? '' : ' fw-bold'}" style="cursor: pointer" onclick="goToTaskFromNotification('${n.groupId}', '${n.taskId}', '${n.id}')">
         <i class="bi bi-info-circle me-2"></i> ${n.message}
         <div class="text-muted small">${new Date(n.created_at).toLocaleString('es-AR', { 
           //Formato de 24 horas Argentina
@@ -116,30 +116,59 @@ async function deleteAllNotifications() {
 }
 
 /**
- * Redirige al usuario a la pantalla correspondiente (admin o miembro)
- * con los parámetros de grupo y tarea especificados en la URL.
+ * Marca una notificación como leída y redirige al usuario a la vista de la tarea correspondiente.
  *
- * Esta función se utiliza para navegar desde una notificación hacia
- * la vista de detalle de una tarea específica dentro de un grupo determinado.
+ * Este flujo realiza tres acciones consecutivas:
+ * 1. Llama a `markNotificationAsRead(notificationId)` para marcar la notificación como leída en el backend.
+ * 2. Actualiza el contador de notificaciones no leídas llamando a `updateNotificationBadge()`.
+ * 3. Redirige al usuario a la vista de detalle de la tarea, usando el `groupId` y `taskId` proporcionados.
+ *    La ruta de destino depende del rol del usuario almacenado en `localStorage` como `selectedGroupRole`.
  *
- * El rol del usuario se obtiene desde el `localStorage` con la clave `selectedGroupRole`.
- * En caso de no encontrarse, se asume el rol "member" por defecto.
- *
- * @function
+ * @function goToTaskFromNotification
  * @param {number|string} groupId - ID del grupo al que pertenece la tarea.
- * @param {number|string} taskId - ID de la tarea a la que se debe redirigir.
+ * @param {number|string} taskId - ID de la tarea a visualizar.
+ * @param {number|string} notificationId - ID de la notificación a marcar como leída.
  *
  * @example
- * goToTaskFromNotification(3, 12);
- * // Si el usuario es admin => redirige a /views/admin/group-admin.html?groupId=3&taskId=12
- * // Si es miembro u otro => redirige a /views/user/group-member.html?groupId=3&taskId=12
+ * // Desde una tarjeta de notificación en el frontend
+ * goToTaskFromNotification(3, 17, 42);
  */
-function goToTaskFromNotification(groupId, taskId) {
-  const role = localStorage.getItem('selectedGroupRole') || 'member';
+function goToTaskFromNotification(groupId, taskId, notificationId) {
+  // 1. Marca como leída en backend
+  markNotificationAsRead(notificationId)
+    .then(() => {
+      // 2. Actualiza el badge
+      updateNotificationBadge();
+      // 3. Redirige a la tarea
+      const role = localStorage.getItem('selectedGroupRole') || 'member';
+      if (role === 'admin') {
+        window.location.href = `/views/admin/group-admin.html?groupId=${groupId}&taskId=${taskId}`;
+      } else {
+        window.location.href = `/views/user/group-member.html?groupId=${groupId}&taskId=${taskId}`;
+      }
+    });
+}
 
-  if (role === 'admin') {
-    window.location.href = `/views/admin/group-admin.html?groupId=${groupId}&taskId=${taskId}`;
-  } else {
-    window.location.href = `/views/user/group-member.html?groupId=${groupId}&taskId=${taskId}`;
-  }
+/**
+ * Marca una notificación como leída en el servidor.
+ *
+ * Esta función realiza una petición HTTP `PUT` al backend para actualizar el estado de lectura (`isRead`)
+ * de una notificación específica, identificada por su `notificationId`.
+ * Requiere que el token JWT esté almacenado en `localStorage` bajo la clave `'token'`.
+ *
+ * @async
+ * @function markNotificationAsRead
+ * @param {number|string} notificationId - ID de la notificación que se desea marcar como leída.
+ *
+ * @example
+ * // Marcar notificación con ID 42 como leída
+ * await markNotificationAsRead(42);
+ */
+async function markNotificationAsRead(notificationId) {
+  const token = localStorage.getItem('token');
+  
+  await fetch(`http://localhost:3000/api/notifications/${notificationId}/read`, {
+    method: 'PUT',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
 }
