@@ -83,6 +83,7 @@ async function newTask(req, res) {
                 type: 'assignment',
                 taskId: tarea.id,
                 groupId: groupId,
+                role: membership.role, 
                 message: `Tarea "${tarea.title}" asignada a ti.`,
                 isRead: false
             });
@@ -442,6 +443,7 @@ async function editTask(req, res) {
             type: 'date_changed',
             taskId: id,
             groupId: task.groupId,
+            role: membership.role,
             message: `Tarea "${task.title}" fue modificada.<br>Nueva fecha de entrega: ${req.body.delivery_date}.`,
             isRead: false
         });

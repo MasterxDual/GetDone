@@ -22,6 +22,10 @@ const Notification = sequelize.define('Notification', {
     type: DataTypes.INTEGER,
     allowNull: true
   },
+  role: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   type: { // 'expiring', 'date_changed', 'assignment'
     type: DataTypes.STRING,
     allowNull: false,

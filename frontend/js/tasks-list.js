@@ -57,13 +57,14 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadTasks() {
     try {
       const token = localStorage.getItem('token');
-      const groupId = localStorage.getItem('selectedGroupId');
       const userId = localStorage.getItem('userId');
       const role = localStorage.getItem('selectedGroupRole'); // Obtengo el rol
-
+      
       // NUEVO: obtener taskId de la URL
       const urlParams = new URLSearchParams(window.location.search);
       const taskIdParam = urlParams.get('taskId');
+      const groupId = localStorage.getItem('selectedGroupId') || urlParams.get('groupId'); // Obtengo el groupId de localStorage o de la URL
+      
 
       console.log('Rol de usuario:', role);
       console.log('Grupo ID:', groupId);

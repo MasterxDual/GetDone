@@ -33,7 +33,7 @@ async function showNotificationsDropdown(event) {
     html += '<span class="dropdown-item-text">Sin notificaciones</span>';
   } else {
     notifications.forEach(n => {
-      html += `<div class="dropdown-item${n.isRead ? '' : ' fw-bold'}" style="cursor: pointer" onclick="goToTaskFromNotification('${n.groupId}', '${n.taskId}', '${n.id}')">
+      html += `<div class="dropdown-item${n.isRead ? '' : ' fw-bold'}" style="cursor: pointer" onclick="goToTaskFromNotification('${n.groupId}', '${n.taskId}', '${n.id}', '${n.role}')">
         <i class="bi bi-info-circle me-2"></i> ${n.message}
         <div class="text-muted small">${new Date(n.created_at).toLocaleString('es-AR', { 
           //Formato de 24 horas Argentina
@@ -133,14 +133,18 @@ async function deleteAllNotifications() {
  * // Desde una tarjeta de notificación en el frontend
  * goToTaskFromNotification(3, 17, 42);
  */
-function goToTaskFromNotification(groupId, taskId, notificationId) {
+function goToTaskFromNotification(groupId, taskId, notificationId, role) {
   // 1. Marca como leída en backend
   markNotificationAsRead(notificationId)
     .then(() => {
       // 2. Actualiza el badge
       updateNotificationBadge();
-      // 3. Redirige a la tarea
-      const role = localStorage.getItem('selectedGroupRole') || 'member';
+
+      // 3. Setea en localStorage para que la página de destino tenga los datos
+      localStorage.setItem('selectedGroupId', groupId);
+      localStorage.setItem('selectedGroupRole', role);
+
+      // 4. Redirige a la tarea
       if (role === 'admin') {
         window.location.href = `/views/admin/group-admin.html?groupId=${groupId}&taskId=${taskId}`;
       } else {
