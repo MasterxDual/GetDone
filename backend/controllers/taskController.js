@@ -191,9 +191,13 @@ async function getTasks(req, res) {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
+
+        // Parametros de ordenamiento
+        const orderBy = req.query.orderBy || 'created_at'; // Por defecto ordena
+        const order = [[orderBy, 'ASC']]; // Orden descendente por defecto
         
         // Filtros
-        if (groupId) where.groupId = groupId;
+        if (groupId) where.groupId = req.query.groupId;
         if (assignedTo) where.assignedTo = assignedTo;
 
         // Consulta paginada y conteo total
@@ -201,7 +205,7 @@ async function getTasks(req, res) {
             where,
             limit,
             offset,
-            order: [['created_at', 'DESC']]
+            order
         });
 
         //Actualización de estado de tareas que expiran pronto (1 día o menos)

@@ -94,11 +94,18 @@
 
             <!-- Contenido del Grupo-->
             <div class="group-list mt-4" id="groupList">
-                <div id="groupInfo" class="mb-3">
-                    <h2 id="groupName"></h2>
-                    <p id="groupDescription"></p>
+                <!-- Centramos el boton de orden con el titulo y descripcion del grupo -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div id="groupInfo" class="mb-3">
+                        <h2 id="groupName"></h2>
+                        <p id="groupDescription"></p>
+                    </div>
+
+                    <!-- Botón para cambiar el orden de las tareas -->
+                    <button id="toggleOrderBtn" class="btn btn-outline-secondary btn-sm">
+                      <i class="bi bi-sort-down"></i> Orden: Creación
+                    </button>
                 </div>
-                
                 <h4>My Tasks</h4>
                 <!-- Lista de Tareas -->
                 <div class="task-list" id="taskList">

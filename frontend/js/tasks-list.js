@@ -3,7 +3,7 @@
 let currentPage = 1; // Página actual
 let totalPages = 1; // Total de páginas
 const PAGE_LIMIT = 5; // Número de grupos por página
-
+let orderType = 'created_at'; // Por defecto, ordenar por fecha de creación
 
 document.addEventListener('DOMContentLoaded', function() {
   requireAuth();
@@ -36,6 +36,18 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+
+  document.getElementById('toggleOrderBtn').addEventListener('click', function() {
+        if (orderType === 'created_at') {
+          orderType = 'delivery_date';
+          this.innerHTML = '<i class="bi bi-calendar2-week"></i> Orden: Vencimiento';
+        } else {
+          orderType = 'created_at';
+          this.innerHTML = '<i class="bi bi-sort-down"></i> Orden: Creación';
+        }
+        // Vuelve a cargar la paginación con el nuevo orden
+        loadTasks(1, orderType);
+  });
 });
 
 /**
@@ -61,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * @function
  * @returns {Promise<void>} No devuelve un valor, pero modifica el DOM con el contenido de tareas.
  */
-async function loadTasks(page = 1) {
+async function loadTasks(page = 1, orderBy = 'created_at') {
     try {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
@@ -71,8 +83,12 @@ async function loadTasks(page = 1) {
       const urlParams = new URLSearchParams(window.location.search);
       const taskIdParam = urlParams.get('taskId');
       const groupId = localStorage.getItem('selectedGroupId') || urlParams.get('groupId'); // Obtengo el groupId de localStorage o de la URL
-      
 
+      const params = new URLSearchParams({
+        page,
+        orderBy //created_at o delivery_date
+      });
+      
       console.log('Rol de usuario:', role);
       console.log('Grupo ID:', groupId);
       console.log('Usuario ID:', userId);
@@ -87,7 +103,7 @@ async function loadTasks(page = 1) {
       if (role !== 'admin') {
         url += `&assignedTo=${userId}`;
       }
-      url += `&page=${page}&limit=${PAGE_LIMIT}`;
+      url += `&page=${page}&limit=${PAGE_LIMIT}&orderBy=${orderBy}`;
 
       console.log('URL para obtener tareas:', url);
 
