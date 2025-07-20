@@ -216,3 +216,8 @@ body {
     background: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
+
+/* Se quita la fecha que tiene el botón de cerrar sesión (icono de apagado) */
+.user-avatar .dropdown-toggle::after {
+  display: none;
+}
