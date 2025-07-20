@@ -192,9 +192,17 @@ async function getTasks(req, res) {
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
 
+        // Mapeo de campos visibles a nombres reales (para Sequelize)
+        const fieldMap = {
+          createdAt: 'created_at',
+          delivery_date: 'delivery_date'
+        };
         // Parametros de ordenamiento
-        const orderBy = req.query.orderBy || 'created_at'; // Por defecto ordena
-        const order = [[orderBy, 'ASC']]; // Orden descendente por defecto
+        const allowedOrderFields = Object.keys(fieldMap);
+        const requestedField = req.query.orderBy;
+        const orderBy = allowedOrderFields.includes(requestedField) ? fieldMap[requestedField] : 'created_at';
+        // Ordenamiento
+        const order = [[orderBy, orderBy === 'delivery_date' ? 'ASC' : 'DESC']];
         
         // Filtros
         if (groupId) where.groupId = req.query.groupId;

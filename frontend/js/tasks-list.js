@@ -3,7 +3,7 @@
 let currentPage = 1; // Página actual
 let totalPages = 1; // Total de páginas
 const PAGE_LIMIT = 5; // Número de grupos por página
-let orderType = 'created_at'; // Por defecto, ordenar por fecha de creación
+let orderType = 'createdAt'; // Por defecto, ordenar por fecha de creación
 
 document.addEventListener('DOMContentLoaded', function() {
   requireAuth();
@@ -38,11 +38,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   document.getElementById('toggleOrderBtn').addEventListener('click', function() {
-        if (orderType === 'created_at') {
+        if (orderType === 'createdAt') {
           orderType = 'delivery_date';
           this.innerHTML = '<i class="bi bi-calendar2-week"></i> Orden: Vencimiento';
         } else {
-          orderType = 'created_at';
+          orderType = 'createdAt';
           this.innerHTML = '<i class="bi bi-sort-down"></i> Orden: Creación';
         }
         // Vuelve a cargar la paginación con el nuevo orden
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * @function
  * @returns {Promise<void>} No devuelve un valor, pero modifica el DOM con el contenido de tareas.
  */
-async function loadTasks(page = 1, orderBy = 'created_at') {
+async function loadTasks(page = 1, orderBy = 'createdAt') {
     try {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
@@ -128,6 +128,8 @@ async function loadTasks(page = 1, orderBy = 'created_at') {
 
       totalPages = data.pagination ? data.pagination.totalPages : 1;
       currentPage = data.pagination ? data.pagination.page : 1;
+
+      console.log('Fechas ordenadas:', tasks.map(t => t.delivery_date));
 
       // NUEVO: filtrar solo por el taskId si existe en la URL
       if (taskIdParam) {
@@ -238,7 +240,7 @@ async function loadTasks(page = 1, orderBy = 'created_at') {
       }
 
       // Renderizar controles de paginación
-      renderPaginationControls(currentPage, totalPages, loadTasks);
+      renderPaginationControls(currentPage, totalPages, (page) => loadTasks(page, orderBy));
     } catch (error) {
       console.error('Error cargando tareas:', error);
     }
