@@ -107,21 +107,39 @@ async function joinGroup(req, res) {
 }
 
 /**
- * Listar los grupos a los que pertenece un usuario
+ * Listar los grupos a los que pertenece un usuario, con paginacion
  */
 async function getUserGroups(req, res) {
     try {
         // ID del usuario autenticado
         const userId = req.user.id;
 
-        // Buscar todos los grupos donde el usuario sea miembro activo
-        const groups = await Group.findAll({
+        // Parámetros de paginación
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
+
+        // // Buscar todos los grupos donde el usuario sea miembro activo
+        // const groups = await Group.findAll({
+        //     include: [{
+        //         model: GroupMember,
+        //         as: 'memberships',
+        //         where: { userId, isActive: true },
+        //         attributes: ['role']  // Incluir solo el atributo 'role' de la membresía
+        //     }]
+        // });
+
+        // Primero obtenemos el total de grupos donde el usuario es miembro
+        const { count, rows: groups } = await Group.findAndCountAll({
             include: [{
                 model: GroupMember,
                 as: 'memberships',
                 where: { userId, isActive: true },
-                attributes: ['role']  // Incluir solo el atributo 'role' de la membresía
-            }]
+                attributes: ['role']
+            }],
+            limit,
+            offset,
+            order: [['id', 'ASC']] // Ordenar por ID ascendentes
         });
 
         // Mapear los resultados para devolver una estructura más limpia
@@ -136,8 +154,19 @@ async function getUserGroups(req, res) {
             };
         });
 
-        // Devolver la lista de grupos formateada
-        res.json(result);
+        // Calcular el total de páginas
+        const totalPages = Math.ceil(count / limit);
+
+        // Devolver el objeto paginado con los grupos y metadatos
+        res.json({
+            groups: result,
+            totalPages,
+            page,
+            totalGroups: count
+        });
+
+        // // Devolver la lista de grupos formateada
+        // res.json(result);
     } catch (error) {
         // Manejo de errores
         console.error(error);

@@ -184,16 +184,22 @@ async function getTasks(req, res) {
         const { groupId, assignedTo } = req.query;
         const where = {};
         const today = new Date();
+
+        // Parametros de paginación
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
         
-        // Construcción dinámica del WHERE clause
+        // Filtros
         if (groupId) where.groupId = groupId;
         if (assignedTo) where.assignedTo = assignedTo;
 
-        const tareas = await taskModel.findAll({ 
+        // Consulta paginada y conteo total
+        const { rows: tareas, count: total } = await taskModel.findAndCountAll({
             where,
-            // Podría añadirse paginación:
-            // limit: parseInt(req.query.limit) || 20,
-            // offset: parseInt(req.query.offset) || 0
+            limit,
+            offset,
+            order: [['created_at', 'DESC']]
         });
 
         //Actualización de estado de tareas que expiran pronto (1 día o menos)
@@ -210,7 +216,16 @@ async function getTasks(req, res) {
           }
         }
 
-        res.json(tareas);
+        // Devuelve tareas y datos de paginación
+        res.json({
+            tareas,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        });
     } catch (err) {
         console.error('Error en getTasks:', err);
         res.status(500).json({ 

@@ -7,6 +7,11 @@ requireAuth();
  */
 const DIR = 'http://localhost:3000/api/groups';
 
+// Variables de paginacion
+let currentPage = 1; // Página actual
+let totalPages = 1; // Total de páginas
+const PAGE_LIMIT = 5; // Número de grupos por página
+
 /**
  * @function loadGroups
  * @description Carga y muestra la lista de grupos del usuario desde la API
@@ -24,24 +29,39 @@ const DIR = 'http://localhost:3000/api/groups';
  * - Captura y registra errores en la consola
  * - No muestra alertas al usuario para evitar interrupciones
  */
-async function loadGroups() {
+async function loadGroups(page = 1) {
     try {
         // 1. Obtener token de autenticación
         const token = localStorage.getItem('token');
         
-        // 2. Petición a la API para obtener grupos
-        const response = await fetch(DIR, {
+        // 2. Petición a la API para obtener grupos con parametros de paginacion
+        const response = await fetch(`${DIR}?page=${page}&limit=${PAGE_LIMIT}`, {
             headers: {
-                'Authorization': `Bearer ${token}` // Autenticación Bearer
+                'Authorization': `Bearer ${token}`, // Autenticación Bearer
             }
         });
+        // const response = await fetch(DIR, {
+        //     headers: {
+        //         'Authorization': `Bearer ${token}` // Autenticación Bearer
+        //     }
+        // });
 
         // Verificar si la respuesta es exitosa
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
 
-        const groups = await response.json();
+        const data = await response.json();
+
+        // Debug: Verificar la respuesta del backend
+        console.log('Respuesta de backend:', data);
+        
+        
+        // data.groups es el array de grupos, data.totalPages es el total de páginas
+        const groups = data.groups || [];
+
+        totalPages = data.totalPages || 1;
+        currentPage = data.page || 1;
 
         // --- NUEVO: Filtrar por groupId si viene en la URL ---
         const urlParams = new URLSearchParams(window.location.search);
@@ -98,6 +118,9 @@ async function loadGroups() {
                 }
             });
         });
+
+        // 5. Renderizar controles de paginación
+        renderPaginationControls(currentPage, totalPages, loadGroups);
     } catch (error) {
         console.error("Error loading groups:", error);
         // Considerar agregar feedback visual al usuario en caso de error
@@ -117,13 +140,50 @@ function goToCreateGroup() {
     window.location.href = "create-group.html";
 }
 
+// // Controles para la paginacion
+// function renderPaginationControls(currentPage, totalPages) {
+//     const paginationContainer = document.getElementById('paginationControls');
+//     paginationContainer.innerHTML = '';
+
+//     if (totalPages <= 1) return;
+
+//     // Botón "Anterior" con icono
+//     const prevButton = document.createElement('button');
+//     prevButton.className = "btn btn-outline-primary mx-1";
+//     prevButton.innerHTML = `<i class="bi bi-chevron-left"></i>`;
+//     prevButton.disabled = currentPage === 1;
+//     prevButton.onclick = () => loadGroups(currentPage - 1);
+//     paginationContainer.appendChild(prevButton);
+
+//     // Números de página
+//     for (let i = 1; i <= totalPages; i++) {
+//         const pageButton = document.createElement('button');
+//         // Página actual: color celeste (btn-info), no clickeable
+//         if (i === currentPage) {
+//             pageButton.className = `btn btn-primary mx-1`;
+//             pageButton.textContent = i;
+//             pageButton.disabled = false;
+//         } else {
+//             pageButton.className = `btn btn-primary mx-1`;
+//             pageButton.textContent = i;
+//             pageButton.disabled = true;
+//             pageButton.onclick = () => loadGroups(i);
+//         }
+//         paginationContainer.appendChild(pageButton);
+//     }
+
+//     // Botón "Siguiente" con icono
+//     const nextButton = document.createElement('button');
+//     nextButton.className = "btn btn-outline-primary mx-1";
+//     nextButton.innerHTML = `<i class="bi bi-chevron-right"></i>`;
+//     nextButton.disabled = currentPage === totalPages;
+//     nextButton.onclick = () => loadGroups(currentPage + 1);
+//     paginationContainer.appendChild(nextButton);
+// }
+
 /**
- * Inicialización de la página
- * @description Configura:
- * 1. Carga inicial de grupos al cargar la ventana
  * 
- * Consideraciones:
- * - No maneja casos donde el token no existe
- * - No verifica si el elemento groupList existe antes de usarlo
  */
-window.onload = loadGroups;
+window.addEventListener('DOMContentLoaded', () => {
+    loadGroups();
+});

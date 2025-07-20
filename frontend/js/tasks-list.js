@@ -1,3 +1,10 @@
+
+// Variables de paginacion
+let currentPage = 1; // Página actual
+let totalPages = 1; // Total de páginas
+const PAGE_LIMIT = 5; // Número de grupos por página
+
+
 document.addEventListener('DOMContentLoaded', function() {
   requireAuth();
   const editForm = document.getElementById('editTaskForm')
@@ -54,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
  * @function
  * @returns {Promise<void>} No devuelve un valor, pero modifica el DOM con el contenido de tareas.
  */
-async function loadTasks() {
+async function loadTasks(page = 1) {
     try {
       const token = localStorage.getItem('token');
       const groupId = localStorage.getItem('selectedGroupId');
@@ -79,14 +86,17 @@ async function loadTasks() {
       if (role !== 'admin') {
         url += `&assignedTo=${userId}`;
       }
+      url += `&page=${page}&limit=${PAGE_LIMIT}`;
 
       console.log('URL para obtener tareas:', url);
 
+      // Peticion a la API con paginación para obtener lista de tareas
       const res = await fetch(url, {
           headers: {
               'Authorization': `Bearer ${token}`
           }
       });
+
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -95,7 +105,12 @@ async function loadTasks() {
         return;
       }
 
-      let tasks = await res.json();
+      const data = await res.json();
+
+      let tasks = data.tareas || [];
+
+      totalPages = data.pagination ? data.pagination.totalPages : 1;
+      currentPage = data.pagination ? data.pagination.page : 1;
 
       // NUEVO: filtrar solo por el taskId si existe en la URL
       if (taskIdParam) {
@@ -204,10 +219,14 @@ async function loadTasks() {
         `;
         list.innerHTML += html;
       }
+
+      // Renderizar controles de paginación
+      renderPaginationControls(currentPage, totalPages, loadTasks);
     } catch (error) {
       console.error('Error cargando tareas:', error);
     }
 }
+
 
 /**
  * Envía un nuevo comentario asociado a una tarea específica al servidor.
@@ -397,4 +416,8 @@ function goToCreateTask() {
 }
 
 // Llamamos la función al cargar la página
-window.onload = loadTasks;
+// window.onload = loadTasks;
+
+window.addEventListener('DOMContentLoaded', () => {
+    loadTasks();
+});
