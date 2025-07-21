@@ -5,9 +5,35 @@ Polling:
 #Ventaja: Fácil de implementar
 #Desventaja: Puede haber un pequeño retraso y un consumo innecesario de recursos si hay muchos usuarios y peticiones. */
 
-window.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
   updateNotificationBadge();
-  setInterval(updateNotificationBadge, 30000); // cada 30 segundos se actualiza el contador
+  setInterval(updateNotificationBadge, 30000);
+
+  const bellIcon = document.getElementById('notificationBell');
+  if (bellIcon) {
+    bellIcon.addEventListener('click', async function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const dropdown = document.getElementById('notificationsDropdown');
+
+      // Si el dropdown ya está visible, lo eliminamos (cerramos)
+      if (dropdown) {
+        dropdown.remove();
+      } else {
+        // Si no está visible, lo mostramos
+        await showNotificationsDropdown(event);
+
+        // Listener para cerrar el dropdown si se hace clic fuera
+        document.addEventListener('click', function closeDropdown(e) {
+          if (!e.target.closest('#notificationsDropdown') && !e.target.closest('.notification-icon-container')) {
+            document.getElementById('notificationsDropdown')?.remove();
+            document.removeEventListener('click', closeDropdown);
+          }
+        });
+      }
+    });
+  }
 });
 
 async function showNotificationsDropdown(event) {
@@ -58,14 +84,6 @@ async function showNotificationsDropdown(event) {
   // Borra otros dropdowns y muestra este
   const iconContainer = document.querySelector('.notification-icon-container');
   iconContainer.insertAdjacentHTML('beforeend', html);
-
-  // Opcional: cierra al hacer click fuera
-  document.addEventListener('click', function closeDropdown(e) {
-    if (!e.target.closest('#notificationsDropdown') && !e.target.closest('.notification-icon-container')) {
-      document.getElementById('notificationsDropdown')?.remove();
-      document.removeEventListener('click', closeDropdown);
-    }
-  });
 }
 
 // Marcar todas como leídas

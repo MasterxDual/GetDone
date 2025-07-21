@@ -94,7 +94,8 @@ async function loadTasks(page = 1, orderBy = 'createdAt', orderDirection = 'DESC
       console.log('Usuario ID:', userId);
 
       if (!groupId || !userId) {
-          alert('No se encontró el grupo actual o el usuario.');
+          // alert('No se encontró el grupo actual o el usuario.');
+          window.location.href = '../../views/auth/login.html';
           return;
       }
 
