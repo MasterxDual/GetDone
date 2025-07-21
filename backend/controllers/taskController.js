@@ -208,6 +208,7 @@ async function getTasks(req, res) {
         const allowedOrderFields = Object.keys(fieldMap);
 
         if(orderField === 'priority') {
+            // Si se ordena por prioridad, usamos un CASE para asignar valores numéricos en la base de datos y así ordenar correctamente
             order = [[Sequelize.literal(`
               CASE priority
                 WHEN 'Alta' THEN 3

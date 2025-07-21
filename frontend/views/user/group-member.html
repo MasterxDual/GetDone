@@ -101,9 +101,11 @@
                         <p id="groupDescription"></p>
                     </div>
                     <div class="btn-group">
+                        <!-- Botón para cambiar el orden de las tareas -->
                         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="orderDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
                           <i class="bi bi-funnel"></i> Ordenar por
                         </button>
+                        <!-- Desplegable que aparece cuando se hace click en el botón para cambiar el orden de las tareas -->
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="orderDropdownBtn">
                           <li><a class="dropdown-item" href="#" data-order-by="createdAt" data-order-dir="DESC">Creación (nuevos primero)</a></li>
                           <li><a class="dropdown-item" href="#" data-order-by="createdAt" data-order-dir="ASC">Creación (antiguos primero)</a></li>
@@ -112,10 +114,6 @@
                           <li><a class="dropdown-item" href="#" data-order-by="priority" data-order-dir="ASC">Prioridad (Baja a Alta)</a></li>
                         </ul>
                     </div>
-                    <!-- Botón para cambiar el orden de las tareas -->
-                    <!-- <button id="toggleOrderBtn" class="btn btn-outline-secondary btn-sm">
-                      <i class="bi bi-sort-down"></i> Orden: Creación
-                    </button> -->
                 </div>
                 <h4>My Tasks</h4>
                 <!-- Lista de Tareas -->
