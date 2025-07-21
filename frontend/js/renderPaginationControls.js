@@ -10,7 +10,7 @@ function renderPaginationControls(currentPage, totalPages, loadPages) {
     prevButton.className = "btn btn-outline-primary mx-1";
     prevButton.innerHTML = `<i class="bi bi-chevron-left"></i>`;
     prevButton.disabled = currentPage === 1;
-    prevButton.onclick = () => loadPages(currentPage - 1, orderType);
+    prevButton.onclick = () => loadPages(currentPage - 1, orderType, orderDirection);
     paginationContainer.appendChild(prevButton);
 
     // Números de página
@@ -25,7 +25,7 @@ function renderPaginationControls(currentPage, totalPages, loadPages) {
             pageButton.className = `btn btn-primary mx-1`;
             pageButton.textContent = i;
             pageButton.disabled = true;
-            pageButton.onclick = () => loadPages(i, orderType);
+            pageButton.onclick = () => loadPages(i, orderType, orderDirection);
         }
         paginationContainer.appendChild(pageButton);
     }
@@ -35,6 +35,6 @@ function renderPaginationControls(currentPage, totalPages, loadPages) {
     nextButton.className = "btn btn-outline-primary mx-1";
     nextButton.innerHTML = `<i class="bi bi-chevron-right"></i>`;
     nextButton.disabled = currentPage === totalPages;
-    nextButton.onclick = () => loadPages(currentPage + 1, orderType);
+    nextButton.onclick = () => loadPages(currentPage + 1, orderType, orderDirection);
     paginationContainer.appendChild(nextButton);
 }

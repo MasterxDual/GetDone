@@ -312,3 +312,7 @@ body.dark-mode .modal-body .form-label {
   color: #f1f3f4 !important;
 }
 
+/* Letra negra del desplegable del filtrado por paginación */
+body.dark-mode .dropdown-item:hover {
+  color: black !important;
+}
