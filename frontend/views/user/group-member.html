@@ -70,7 +70,7 @@
                         <div id="searchSuggestions" class="search-suggestions"></div>
                     </div>
                     <!-- Notificaciones y Perfil de Usuario -->
-                    <a href="#" class="btn btn-notification" id="notificationBell" onclick="showNotificationsDropdown(event)">
+                    <a href="#" class="btn btn-notification" id="notificationBell">
                       <div class="notification-icon-container">
                           <i class="bi bi-bell"></i>
                           <span id="notificationBadge" class="badge bg-danger"></span>
@@ -82,7 +82,7 @@
                     <!-- Avatar de Usuario -->
                     <div class="user-avatar">
                       <button class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i>
+                        <i class="bi bi-power fs-5"></i>
                       </button>
                       <ul class="dropdown-menu">
                         <li><a class="dropdown-item text-danger" href="#" onclick="logout()">Cerrar Sesión</a></li>
@@ -94,11 +94,27 @@
 
             <!-- Contenido del Grupo-->
             <div class="group-list mt-4" id="groupList">
-                <div id="groupInfo" class="mb-3">
-                    <h2 id="groupName"></h2>
-                    <p id="groupDescription"></p>
+                <!-- Centramos el boton de orden con el titulo y descripcion del grupo -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div id="groupInfo" class="mb-3">
+                        <h2 id="groupName"></h2>
+                        <p id="groupDescription"></p>
+                    </div>
+                    <div class="btn-group">
+                        <!-- Botón para cambiar el orden de las tareas -->
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="orderDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-funnel"></i> Ordenar por
+                        </button>
+                        <!-- Desplegable que aparece cuando se hace click en el botón para cambiar el orden de las tareas -->
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="orderDropdownBtn">
+                          <li><a class="dropdown-item" href="#" data-order-by="createdAt" data-order-dir="DESC">Creación (nuevos primero)</a></li>
+                          <li><a class="dropdown-item" href="#" data-order-by="createdAt" data-order-dir="ASC">Creación (antiguos primero)</a></li>
+                          <li><a class="dropdown-item" href="#" data-order-by="delivery_date" data-order-dir="ASC">Vencimiento (más próxima primero)</a></li>
+                          <li><a class="dropdown-item" href="#" data-order-by="priority" data-order-dir="DESC">Prioridad (Alta a Baja)</a></li>
+                          <li><a class="dropdown-item" href="#" data-order-by="priority" data-order-dir="ASC">Prioridad (Baja a Alta)</a></li>
+                        </ul>
+                    </div>
                 </div>
-                
                 <h4>My Tasks</h4>
                 <!-- Lista de Tareas -->
                 <div class="task-list" id="taskList">

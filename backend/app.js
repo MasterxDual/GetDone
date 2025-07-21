@@ -49,6 +49,23 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 // Servir solo archivos públicos (login, registro, index) sin autenticación
 app.use('/public', express.static(path.join(__dirname, '../frontend')));
 
+
+/* 
+--> Sirve los archivos HTML SIN autenticación
+    Los archivos HTML deben servirse sin autenticación.
+    La protección de acceso debe hacerse en el frontend, comprobando el token y el rol con JS después de cargar la página
+--> Controla el acceso en el frontend
+    Después de cargar la página, tu JS puede hacer una llamada protegida (con JWT) a /api/users/me para comprobar el rol y mostrar o redirigir según corresponda.
+--> ¿Por qué funciona?
+    Cuando navegas o refrescas la página, el HTML se sirve siempre (no requiere token).
+    El JS de la página pide los datos (protegidos) a la API, usando el token. Si no tiene token o no tiene permisos, ahí muestras el error en la interfaz.
+    De esta forma, cualquier usuario puede acceder a cualquier pantalla HTML (incluyendo settings), y los permisos los controlás luego desde el frontend y las APIs.
+--> Sirve todas las vistas sin autenticación 
+--> Sirve los archivos HTML como archivos estáticos (NO protegidos con autenticación).
+--> Protege solo las rutas API.
+--> Valida permisos en el frontend después de cargar la página.
+// app.use('/views', express.static(path.join(__dirname, '../frontend/views')));*/
+
 // Rutas protegidas para vistas de usuario
 app.get('/views/user/:page', authenticateToken, (req, res) => {
     const page = req.params.page;

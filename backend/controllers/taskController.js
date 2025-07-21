@@ -15,6 +15,7 @@ const Group = require('../models/groupModel'); // Modelo de grupos
 const { User } = require('../models/userModel'); // Modelo de usuarios
 const Notification = require('../models/notificationModel'); // Modelo de notificaciones
 const { sendAssignmentEmail, sendDateChangedEmail } = require('./emailController');
+const Sequelize = require('sequelize'); // Importa Sequelize para operaciones avanzadas
 
 /**
  * @function newTask
@@ -82,6 +83,8 @@ async function newTask(req, res) {
                 userId: assignedTo,
                 type: 'assignment',
                 taskId: tarea.id,
+                groupId: groupId,
+                role: membership.role, 
                 message: `Tarea "${tarea.title}" asignada a ti.`,
                 isRead: false
             });
@@ -190,8 +193,38 @@ async function getTasks(req, res) {
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
         
+        // Parametros de ordenamiento
+        const orderField = req.query.orderBy || 'createdAt'; // Campo por defecto
+        const orderDirection = ['ASC', 'DESC'].includes(req.query.orderDirection) ? req.query.orderDirection : 'DESC';
+        let order;
+        let orderBy;
+        
+        // Mapeo de campos visibles a nombres reales (para Sequelize)
+        const fieldMap = {
+          createdAt: 'created_at',
+          delivery_date: 'delivery_date',
+          priority: 'priority'
+        };
+        const allowedOrderFields = Object.keys(fieldMap);
+
+        if(orderField === 'priority') {
+            // Si se ordena por prioridad, usamos un CASE para asignar valores numéricos en la base de datos y así ordenar correctamente
+            order = [[Sequelize.literal(`
+              CASE priority
+                WHEN 'Alta' THEN 3
+                WHEN 'Media' THEN 2
+                WHEN 'Baja' THEN 1
+                ELSE 0
+              END
+            `), orderDirection]];
+        } else {
+            // Si se ordena por fecha de creación o fecha de vencimiento
+            orderBy = allowedOrderFields.includes(req.query.orderBy) ? fieldMap[req.query.orderBy] : 'created_at';
+            order = [[orderBy, orderDirection]];
+        }
+
         // Filtros
-        if (groupId) where.groupId = groupId;
+        if (groupId) where.groupId = req.query.groupId;
         if (assignedTo) where.assignedTo = assignedTo;
 
         // Consulta paginada y conteo total
@@ -199,7 +232,7 @@ async function getTasks(req, res) {
             where,
             limit,
             offset,
-            order: [['created_at', 'DESC']]
+            order
         });
 
         //Actualización de estado de tareas que expiran pronto (1 día o menos)
@@ -455,6 +488,8 @@ async function editTask(req, res) {
             userId: task.assignedTo,
             type: 'date_changed',
             taskId: id,
+            groupId: task.groupId,
+            role: membership.role,
             message: `Tarea "${task.title}" fue modificada.<br>Nueva fecha de entrega: ${req.body.delivery_date}.`,
             isRead: false
         });

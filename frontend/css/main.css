@@ -176,6 +176,7 @@ body {
   padding: 2px 8px;
 }
 
+/* Estilo al circulo rojo que cuenta las notificaciones */
 #notificationBadge {
     position: absolute;
     top: -4px;
@@ -188,17 +189,21 @@ body {
     z-index: 10;
 
 }
+
+/* Contenedor que contiene la campana de notificaciones */
 .notification-icon-container {
     position: relative;
     display: inline-block;
-    width: 24px;
-    height: 24px;
+    width: 21px;
+    height: 21px;
 }
 
+/* Estilo a la campana de notificaciones */
 .notification-icon-container i {
-    font-size: 24px;
+    font-size: 21px;
     display: block;
 }
+
 
 .dropdown-menu {
     position: absolute;
@@ -210,4 +215,9 @@ body {
     z-index: 20;
     background: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Se quita la fecha que tiene el botón de cerrar sesión (icono de apagado) */
+.user-avatar .dropdown-toggle::after {
+  display: none;
 }

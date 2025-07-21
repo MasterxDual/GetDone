@@ -4,6 +4,7 @@ const { User } = require('../models/userModel');
 const { sendExpiringTask } = require('../controllers/emailController'); // importa tu configuración de mailer
 const { Op } = require('sequelize');
 const Notification = require('../models/notificationModel'); // Importa el modelo de notificaciones
+const GroupMember = require('../models/groupMemberModel'); // Importa el modelo de miembros de grupo
 
 /**
  * Tarea programada con cron que se ejecuta cada minuto.
@@ -51,6 +52,12 @@ cron.schedule('* * * * *', async () => {
 
       // Verifica si el usuario tiene un email registrado
       if (user && user.email) {
+        // <<<--- NUEVO: Busca el rol del usuario en el grupo de la tarea
+        const membership = await GroupMember.findOne({
+          where: { userId: user.id, groupId: task.groupId }
+        });
+        const role = membership ? membership.role : null;
+
         await sendExpiringTask(user.email, task); // Envía el correo de notificación de vencimiento
 
         // Marca la tarea como notificada para evitar enviar múltiples correos
@@ -61,6 +68,8 @@ cron.schedule('* * * * *', async () => {
           userId: user.id,
           type: 'expiring',
           taskId: task.id,
+          groupId: task.groupId,
+          role: role, 
           message: `Tarea "${task.title}" está por vencer.<br>Fecha de vencimiento: ${task.delivery_date}.`,
           isRead: false
         });

@@ -1,23 +1,27 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const themeSwitch = document.getElementById('themeSwitch');
-    
-    // Cargar preferencia guardada (si la hay)
-    const savedTheme = localStorage.getItem('theme');
+  const themeSwitch = document.getElementById('themeSwitch');
+  const savedTheme = localStorage.getItem('theme');
 
-    // Verificar si hay un tema guardado o si el usuario prefiere el modo oscuro y lo mantiene aunque la pagina se recargue
-    if (savedTheme === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.body.classList.add('dark-mode');
-        themeSwitch.checked = true;
+  // Siempre aplicar clase dark-mode si corresponde
+  if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.body.classList.add('dark-mode');
+
+    // Si el switch existe, marcamos como activado visualmente
+    if (themeSwitch) {
+      themeSwitch.checked = true;
     }
+  }
 
-    // Cambiar tema al hacer toggle
+  // Solo si existe el switch, agregamos el listener para cambiar de tema
+  if (themeSwitch) {
     themeSwitch.addEventListener('change', () => {
-        if (themeSwitch.checked) {
-          document.body.classList.add('dark-mode');
-          localStorage.setItem('theme', 'dark');
-        } else {
-          document.body.classList.remove('dark-mode');
-          localStorage.setItem('theme', 'light');
-        }
+      if (themeSwitch.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      }
     });
+  }
 });

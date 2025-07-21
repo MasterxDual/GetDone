@@ -77,7 +77,7 @@ async function getNotifications(req, res) {
  *   }
  * });
  */
-async function markNotificationAsRead(req, res) {
+async function markAllNotificationsAsRead(req, res) {
     try {
         const userId = req.user.id;
     
@@ -114,8 +114,49 @@ async function deleteAllNotifications(req, res) {
   }
 }
 
+/**
+ * Marca una notificación específica como leída para el usuario autenticado.
+ *
+ * Esta función busca una notificación por su ID (`req.params.id`) y verifica que pertenezca
+ * al usuario autenticado (`req.user.id`). Si existe, actualiza el campo `isRead` a `true`.
+ *
+ * @async
+ * @function markNotificationAsRead
+ * @param {Object} req - Objeto de solicitud HTTP de Express.
+ * @param {Object} req.params - Parámetros de la ruta.
+ * @param {number|string} req.params.id - ID de la notificación a marcar como leída.
+ * @param {Object} req.user - Objeto del usuario autenticado (inyectado por middleware).
+ * @param {number} req.user.id - ID del usuario autenticado.
+ * @param {Object} res - Objeto de respuesta HTTP de Express.
+ * @returns {JSON} - Respuesta en formato JSON indicando éxito (`{ ok: true }`) o error.
+ *
+ * @example
+ * // Petición desde el frontend:
+ * fetch('/api/notifications/5/markasread', {
+ *   method: 'PUT',
+ *   headers: { 'Authorization': `Bearer <token>` }
+ * });
+ */
+async function markNotificationAsRead(req, res) {
+  try {
+    const notificationId = req.params.id;
+    const userId = req.user.id; // del middleware de autenticación
+    const notification = await Notification.findOne({ where: { id: notificationId, userId } });
+
+    if (!notification) return res.status(404).json({ error: 'No encontrada' });
+
+    notification.isRead = true;
+
+    await notification.save();
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno al marcar como leída' });
+  }
+}
+
 module.exports = {
     getNotifications,
-    markNotificationAsRead,
-    deleteAllNotifications
+    markAllNotificationsAsRead,
+    deleteAllNotifications,
+    markNotificationAsRead
 };

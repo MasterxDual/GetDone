@@ -3,7 +3,8 @@
 let currentPage = 1; // Página actual
 let totalPages = 1; // Total de páginas
 const PAGE_LIMIT = 5; // Número de grupos por página
-
+let orderType = 'createdAt'; // Por defecto, ordenar por fecha de creación
+let orderDirection = 'DESC'; // Orden descendente por defecto
 
 document.addEventListener('DOMContentLoaded', function() {
   requireAuth();
@@ -36,6 +37,17 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+
+  document.querySelectorAll('.dropdown-menu .dropdown-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      orderType = this.getAttribute('data-order-by');
+      orderDirection = this.getAttribute('data-order-dir');
+      // Actualiza el texto del botón si quieres
+      document.getElementById('orderDropdownBtn').innerHTML = `<i class="bi bi-funnel"></i> ${this.textContent}`;
+      loadTasks(1, orderType, orderDirection);
+    });
+  });
 });
 
 /**
@@ -61,23 +73,29 @@ document.addEventListener('DOMContentLoaded', function() {
  * @function
  * @returns {Promise<void>} No devuelve un valor, pero modifica el DOM con el contenido de tareas.
  */
-async function loadTasks(page = 1) {
+async function loadTasks(page = 1, orderBy = 'createdAt', orderDirection = 'DESC') {
     try {
       const token = localStorage.getItem('token');
-      const groupId = localStorage.getItem('selectedGroupId');
       const userId = localStorage.getItem('userId');
       const role = localStorage.getItem('selectedGroupRole'); // Obtengo el rol
-
+      
       // NUEVO: obtener taskId de la URL
       const urlParams = new URLSearchParams(window.location.search);
       const taskIdParam = urlParams.get('taskId');
+      const groupId = localStorage.getItem('selectedGroupId') || urlParams.get('groupId'); // Obtengo el groupId de localStorage o de la URL
 
+      const params = new URLSearchParams({
+        page,
+        orderBy //created_at o delivery_date
+      });
+      
       console.log('Rol de usuario:', role);
       console.log('Grupo ID:', groupId);
       console.log('Usuario ID:', userId);
 
       if (!groupId || !userId) {
-          alert('No se encontró el grupo actual o el usuario.');
+          // alert('No se encontró el grupo actual o el usuario.');
+          window.location.href = '../../views/auth/login.html';
           return;
       }
 
@@ -86,7 +104,7 @@ async function loadTasks(page = 1) {
       if (role !== 'admin') {
         url += `&assignedTo=${userId}`;
       }
-      url += `&page=${page}&limit=${PAGE_LIMIT}`;
+      url += `&page=${page}&limit=${PAGE_LIMIT}&orderBy=${orderBy}&orderDirection=${orderDirection}`;
 
       console.log('URL para obtener tareas:', url);
 
@@ -111,6 +129,10 @@ async function loadTasks(page = 1) {
 
       totalPages = data.pagination ? data.pagination.totalPages : 1;
       currentPage = data.pagination ? data.pagination.page : 1;
+
+      console.log('Fechas ordenadas:', tasks.map(t => t.delivery_date));
+      console.log('Cargando tareas: page =', page, 'orderBy =', orderBy, 'orderDirection =', orderDirection);
+
 
       // NUEVO: filtrar solo por el taskId si existe en la URL
       if (taskIdParam) {
@@ -173,31 +195,66 @@ async function loadTasks(page = 1) {
         // Si la prioridad no está definida, usar 'secondary' como valor por defecto
         const priorityBadge = priorityColors[task.priority] || 'secondary';
 
+        // Formatear fecha de creación
+        const createdAt = new Date(task.created_at).toLocaleDateString('es-AR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+        const createdHour = new Date(task.created_at).toLocaleTimeString('es-AR', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
+        const createdAtFormatted = `${createdAt} ${createdHour} hs`;
+
+
         // Construir el HTML de la tarea
         const html = `
           <div class="card mb-3 shadow-sm border-0">
-            <div class="card-body d-flex align-items-center">
-              <div class="me-3">
-                <i class="bi bi-list-check fs-2 text-primary"></i>
-              </div>
-              <div class="flex-grow-1">
-                <div class="d-flex justify-content-between align-items-center">
-                  <h5 class="card-title mb-1">${task.title}</h5>
-                  <span class="badge bg-${priorityBadge}">${task.priority}</span>
+            <div class="card-body position-relative">
+              <!-- Contenido principal -->
+              <div class="d-flex">
+                <!-- Ícono a la izquierda -->
+                <div class="me-3">
+                  <i class="bi bi-list-check fs-2 text-primary"></i>
                 </div>
-                <p class="card-text text-muted mb-2">${task.description}</p>
-                <div class="d-flex align-items-center gap-2">
-                  <input type="checkbox" class="form-check-input me-2" id="taskCheckbox-${task.id}" 
-                    ${task.status === 'completed' ? 'checked' : ''} 
-                    onchange="toggleTaskCompletion(${task.id}, this)" 
-                    ${role !== 'admin' && role !== 'member' ? 'disabled' : ''} 
-                    style="cursor: pointer;">
-                  <span class="status-box ${expClass}" id="taskExpiration-${task.id}">
-                    <i class="bi bi-calendar-event" ></i> Exp: ${task.delivery_date}
-                  </span>
+
+                <!-- Contenido central -->
+                <div class="flex-grow-1">
+                  <!-- Fila superior: título y prioridad -->
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="card-title mb-0">${task.title}</h5>
+                    <span class="badge bg-${priorityBadge} ms-2"
+                        ${role === 'admin' ? 'style="position: relative; right: 40px; bottom: 5px"' : ''}>
+                      ${task.priority}
+                    </span>
+                  </div>
+
+                  <!-- Descripción -->
+                  <p class="card-text text-muted mb-2">${task.description}</p>
+
+                  <!-- Fila inferior: checkbox y fechas -->
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="checkbox" class="form-check-input me-2" id="taskCheckbox-${task.id}" 
+                        ${task.status === 'completed' ? 'checked' : ''} 
+                        onchange="toggleTaskCompletion(${task.id}, this)" 
+                        ${role !== 'admin' && role !== 'member' ? 'disabled' : ''} 
+                        style="cursor: pointer;">
+                      <span class="status-box ${expClass}" id="taskExpiration-${task.id}">
+                        <i class="bi bi-calendar-event"></i> Exp: ${task.delivery_date}
+                      </span>
+                    </div>
+                    <div class="text-muted small">
+                      <i class="bi bi-clock"></i> Creada: <strong>${createdAtFormatted}</strong>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="ms-3">
+
+              <!-- Botón de tres puntos (ahora en esquina superior derecha) -->
+              <div class="position-absolute top-0 end-0 mt-2 me-2">
                 <div class="dropdown">
                   ${role === 'admin' ? `
                     <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton${task.id}"
@@ -208,20 +265,22 @@ async function loadTasks(page = 1) {
                       <li><a class="dropdown-item" href="#" onclick="openEditTaskModal(${task.id}, '${task.description.replace(/'/g, "\\'")}', '${task.delivery_date}')">Editar</a></li>
                       <li><a class="dropdown-item text-danger" href="#" onclick="deleteTask(${task.id})">Eliminar</a></li>
                     </ul>
-                    ` : ''}
+                  ` : ''}
                 </div>
               </div>
             </div>
+                
+            <!-- Comentarios -->
             <div class="card-footer bg-white border-0 pt-0">
               ${commentsHtml}
             </div>
-          </div>
+        </div>
         `;
         list.innerHTML += html;
       }
 
       // Renderizar controles de paginación
-      renderPaginationControls(currentPage, totalPages, loadTasks);
+      renderPaginationControls(currentPage, totalPages, (page) => loadTasks(page, orderBy, orderDirection));
     } catch (error) {
       console.error('Error cargando tareas:', error);
     }
