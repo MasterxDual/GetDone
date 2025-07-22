@@ -151,7 +151,7 @@ body.dark-mode .badge.bg-primary {
 
 /* Fondo oscuro para footers de cards en modo oscuro */
 body.dark-mode .card-footer.bg-white {
-  background-color: #212529 !important;
+  background-color: #23272b !important;
   color: #f8f9fa !important;
   border-top: 1px solid #343a40;
 }
