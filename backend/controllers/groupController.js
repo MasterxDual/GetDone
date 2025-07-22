@@ -439,6 +439,109 @@ async function searchGroups(req, res) {
     }
 }
 
+/**
+ * Elimina un grupo, siempre y cuando el usuario autenticado sea el administrador del mismo.
+ *
+ * @async
+ * @function deleteGroup
+ * @param {import('express').Request} req - Objeto de solicitud de Express.
+ * @param {Object} req.params - Parámetros de la ruta.
+ * @param {string} req.params.id - ID del grupo a eliminar.
+ * @param {Object} req.user - Objeto del usuario autenticado (proporcionado por el middleware de autenticación).
+ * @param {string} req.user.id - ID del usuario autenticado.
+ * @param {import('express').Response} res - Objeto de respuesta de Express.
+ * 
+ * @returns {Promise<void>} Respuesta JSON con mensaje de éxito o error.
+ *
+ * @throws {404} Si el grupo no existe.
+ * @throws {403} Si el usuario no es administrador del grupo.
+ * @throws {500} Si ocurre un error interno al intentar eliminar el grupo.
+ */
+async function deleteGroup(req, res) {
+  const groupId = req.params.id;
+  const userId = req.user?.id; // Si usas autenticación, asegúrate de tener el userId
+
+  try {
+    // Validación: solo el admin del grupo puede eliminarlo
+    // Ejemplo: busca el grupo y verifica el rol
+    const group = await Group.findByPk(groupId);
+    if (!group) {
+      return res.status(404).json({ message: 'Grupo no encontrado' });
+    }
+
+    // Verifica que el usuario sea admin del grupo (ajusta según tu modelo-relación)
+    // Suponiendo que tienes un modelo GroupMember con roles:
+    const membership = await GroupMember.findOne({
+      where: { groupId, userId }
+    });
+
+    if (!membership || membership.role !== 'admin') {
+      return res.status(403).json({ message: 'Solo el admin puede eliminar el grupo.' });
+    }
+
+    // Elimina el grupo y opcionalmente sus relaciones (miembros, tareas, etc.)
+    await group.destroy();
+
+    return res.status(200).json({ message: 'Grupo eliminado correctamente.' });
+  } catch (error) {
+    console.error('Error al eliminar grupo:', error);
+    return res.status(500).json({ message: 'Error al eliminar el grupo.' });
+  }
+}
+
+/**
+ * Edita un grupo existente, siempre y cuando el usuario autenticado sea administrador del mismo.
+ *
+ * @async
+ * @function editGroup
+ * @param {import('express').Request} req - Objeto de solicitud de Express.
+ * @param {Object} req.params - Parámetros de la ruta.
+ * @param {string} req.params.id - ID del grupo a editar.
+ * @param {Object} req.user - Objeto del usuario autenticado (agregado por middleware de autenticación).
+ * @param {string} req.user.id - ID del usuario autenticado.
+ * @param {Object} req.body - Cuerpo de la solicitud que contiene los nuevos datos del grupo.
+ * @param {string} [req.body.name] - Nuevo nombre para el grupo (opcional).
+ * @param {string} [req.body.description] - Nueva descripción para el grupo (opcional).
+ * @param {import('express').Response} res - Objeto de respuesta de Express.
+ * 
+ * @returns {Promise<void>} Respuesta JSON con mensaje de éxito o error.
+ *
+ * @throws {404} Si el grupo no existe.
+ * @throws {403} Si el usuario no es administrador del grupo.
+ * @throws {500} Si ocurre un error interno al intentar modificar el grupo.
+ */
+async function editGroup(req, res) {
+  const groupId = req.params.id;
+  const userId = req.user?.id; // Debe estar disponible tras autenticación
+  const { name, description } = req.body;
+
+  try {
+    const group = await Group.findByPk(groupId);
+    if (!group) {
+      return res.status(404).json({ message: 'Grupo no encontrado.' });
+    }
+
+    // Verificar que el usuario sea admin del grupo
+    const membership = await GroupMember.findOne({
+      where: { groupId, userId }
+    });
+    if (!membership || membership.role !== 'admin') {
+      return res.status(403).json({ message: 'Solo el admin puede modificar el grupo.' });
+    }
+
+    // Actualizar el grupo (solo si se envió el campo)
+    if (typeof name === 'string' && name.trim() !== '') group.name = name.trim();
+    if (typeof description === 'string') group.description = description.trim();
+
+    await group.save();
+
+    return res.status(200).json({ message: 'Grupo modificado correctamente.', group });
+  } catch (error) {
+    console.error('Error al modificar el grupo:', error);
+    return res.status(500).json({ message: 'Error al modificar el grupo.' });
+  }
+}
+
 // Exportar todas las funciones del controlador
 module.exports = {
     createGroup,
@@ -448,5 +551,7 @@ module.exports = {
     acceptInvitation,
     getGroupById,
     getGroupMembers,
-    searchGroups
+    searchGroups,
+    deleteGroup,
+    editGroup
 };

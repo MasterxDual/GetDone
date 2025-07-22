@@ -66,6 +66,18 @@ router.get('/search', authenticateToken, groupController.searchGroups);
 router.get('/:id', groupController.getGroupById);
 
 /**
+ * Eliminar un grupo (solo admin)
+ * DELETE /api/groups/:id/delete
+ */
+router.delete('/:id/delete', authenticateToken, groupController.deleteGroup);
+
+/**
+ * Editar un grupo (solo admin)
+ * PUT /api/groups/:id/edit
+ */
+router.put('/:id/edit', authenticateToken, groupController.editGroup);
+
+/**
  * Obtener los integrantes de un grupo (solo admin)
  * GET /api/groups/:id/members
  */

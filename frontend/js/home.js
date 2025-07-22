@@ -81,19 +81,37 @@ async function loadGroups(page = 1) {
             list.innerHTML = `<div class="alert alert-info">No se encontró el grupo solicitado.</div>`;
         } else {
             filteredGroups.forEach(group => {
+                const isAdmin = group.role === 'admin';
+                
                 const html = `
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">${group.name}</h5>
-                            <p class="card-text">${group.description}</p>
-                            <button 
-                                class="btn btn-primary view-group-btn" 
-                                data-group-id="${group.id}" 
-                                data-role="${group.role}">
-                                View Group
-                            </button>
-                        </div>
+                <div class="card mb-3 shadow-sm border-0">
+                  <div class="card-body position-relative">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <h5 class="card-title mb-1">${group.name}</h5>
+                        <p class="card-text text-muted mb-3">${group.description}</p>
+                        <button 
+                            class="btn btn-primary view-group-btn" 
+                            data-group-id="${group.id}" 
+                            data-role="${group.role}">
+                            View Group
+                        </button>
+                      </div>
+                      ${isAdmin ? `
+                      <div class="dropdown ms-2">
+                        <button class="btn btn-light btn-sm" type="button" id="groupDropdown${group.id}"
+                          data-bs-toggle="dropdown" aria-expanded="false" style="position: absolute; top: 0; right: 0;">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="groupDropdown${group.id}">
+                          <li><a class="dropdown-item" href="#" onclick="openEditGroupModal(${group.id}, '${group.name.replace(/'/g, "\\'")}', '${group.description.replace(/'/g, "\\'")}')">Editar</a></li>
+                          <li><a class="dropdown-item text-danger" href="#" onclick="deleteGroup(${group.id})">Eliminar</a></li>
+                        </ul>
+                      </div>
+                      ` : ''}
                     </div>
+                  </div>
+                </div>
                 `;
                 list.innerHTML += html; // Agregar cada grupo a la lista
             });
@@ -140,50 +158,105 @@ function goToCreateGroup() {
     window.location.href = "create-group.html";
 }
 
-// // Controles para la paginacion
-// function renderPaginationControls(currentPage, totalPages) {
-//     const paginationContainer = document.getElementById('paginationControls');
-//     paginationContainer.innerHTML = '';
+/**
+ * Abre el modal de edición de grupo y precarga los datos del grupo seleccionado.
+ *
+ * Esta función asigna los valores del grupo (ID, nombre y descripción) a los campos
+ * correspondientes dentro del formulario del modal y luego muestra el modal utilizando Bootstrap.
+ *
+ * @function openEditGroupModal
+ * @param {number|string} id - ID del grupo a editar.
+ * @param {string} name - Nombre actual del grupo.
+ * @param {string} description - Descripción actual del grupo.
+ *
+ * @example
+ * openEditGroupModal(1, 'Grupo de Estudio', 'Grupo para estudiar programación');
+ */
+function openEditGroupModal(id, name, description) {
+  document.getElementById('editGroupId').value = id;
+  document.getElementById('editGroupName').value = name;
+  document.getElementById('editGroupDescription').value = description;
+  var modal = new bootstrap.Modal(document.getElementById('editGroupModal'));
+  modal.show();
+}
 
-//     if (totalPages <= 1) return;
-
-//     // Botón "Anterior" con icono
-//     const prevButton = document.createElement('button');
-//     prevButton.className = "btn btn-outline-primary mx-1";
-//     prevButton.innerHTML = `<i class="bi bi-chevron-left"></i>`;
-//     prevButton.disabled = currentPage === 1;
-//     prevButton.onclick = () => loadGroups(currentPage - 1);
-//     paginationContainer.appendChild(prevButton);
-
-//     // Números de página
-//     for (let i = 1; i <= totalPages; i++) {
-//         const pageButton = document.createElement('button');
-//         // Página actual: color celeste (btn-info), no clickeable
-//         if (i === currentPage) {
-//             pageButton.className = `btn btn-primary mx-1`;
-//             pageButton.textContent = i;
-//             pageButton.disabled = false;
-//         } else {
-//             pageButton.className = `btn btn-primary mx-1`;
-//             pageButton.textContent = i;
-//             pageButton.disabled = true;
-//             pageButton.onclick = () => loadGroups(i);
-//         }
-//         paginationContainer.appendChild(pageButton);
-//     }
-
-//     // Botón "Siguiente" con icono
-//     const nextButton = document.createElement('button');
-//     nextButton.className = "btn btn-outline-primary mx-1";
-//     nextButton.innerHTML = `<i class="bi bi-chevron-right"></i>`;
-//     nextButton.disabled = currentPage === totalPages;
-//     nextButton.onclick = () => loadGroups(currentPage + 1);
-//     paginationContainer.appendChild(nextButton);
-// }
 
 /**
- * 
+ * Elimina un grupo mediante una solicitud HTTP DELETE al backend.
+ *
+ * Esta función muestra una confirmación al usuario antes de proceder. 
+ * Si el usuario confirma, se envía una solicitud autenticada para eliminar el grupo por su ID.
+ * Tras la eliminación, recarga la lista de grupos con `loadGroups()`.
+ *
+ * @async
+ * @function deleteGroup
+ * @param {number|string} id - ID del grupo a eliminar.
+ *
+ * @returns {Promise<void>} No retorna valor directamente; muestra mensajes al usuario según el resultado.
+ *
+ * @example
+ * deleteGroup(5); // Elimina el grupo con ID 5 si el usuario lo confirma.
+ *
+ * @throws Muestra alertas al usuario si ocurre un error en la solicitud o en la respuesta del servidor.
  */
+async function deleteGroup(id) {
+  if (!confirm('¿Está seguro que desea eliminar este grupo?')) {
+    return;
+  }
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`http://localhost:3000/api/groups/${id}/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      alert('Error al eliminar el grupo: ' + (data.message || 'Error desconocido'));
+      return;
+    }
+
+    alert('Grupo eliminado correctamente');
+    loadGroups(); // Recargar lista de grupos
+  } catch (error) {
+    console.error('Error eliminando grupo:', error);
+    alert('No se pudo eliminar el grupo.');
+  }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+    // Carga la lista de grupos cuando se inicia la página.
     loadGroups();
+
+    document.getElementById('editGroupForm')?.addEventListener('submit', async function(e) {
+      // Previene el comportamiento por defecto del formulario (recarga de la página).
+      e.preventDefault();
+
+      const id = document.getElementById('editGroupId').value;
+      const name = document.getElementById('editGroupName').value;
+      const description = document.getElementById('editGroupDescription').value;
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`http://localhost:3000/api/groups/${id}/edit`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ name, description })
+        });
+        if (res.ok) {
+          // Recargar la lista o actualizar dinámicamente
+          loadGroups();
+
+          // Cierra el modal de edición utilizando la instancia Bootstrap ya abierta.
+          var modal = bootstrap.Modal.getInstance(document.getElementById('editGroupModal'));
+          modal.hide();
+        } else {
+          alert('Solo el admin puede editar el grupo.');
+        }
+      } catch (err) {
+        alert('Error al editar el grupo.');
+      }
+    });
 });
